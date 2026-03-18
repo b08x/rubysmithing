@@ -19,7 +19,8 @@ A modular, convention-aware skill suite for Ruby development with AI assistance.
 ├── rubysmithing-genai/        # AI/NLP scaffolding & patterns
 ├── rubysmithing-refactor/     # Targeted convention fixes
 ├── rubysmithing-report/       # SIFT Protocol V1.0 QA assessments
-└── rubysmithing-tui/          # Terminal UI building with adapter pattern
+├── rubysmithing-tui/          # Terminal UI building with adapter pattern
+└── rubysmithing-yardoc/       # YARD documentation generation with semantic analysis
     └── assets/skeleton/       # Standardized TUI project structure
 ```
 
@@ -60,6 +61,11 @@ Scaffolds AI/NLP components (Chat agents, RAG pipelines, DSPy modules, MCP serve
 Rewrites code to follow conventions.
 - **What's new:** Now uses a "Pre-Refactor Audit" phase before generating code to ensure transparency.
 - **Use cases:** "Convert Thread.new to Async fiber", "Fix Zeitwerk compliance issues".
+
+### rubysmithing-yardoc
+YARD documentation generator with semantic analysis and type inference.
+- **What's new:** Advanced AST parsing and behavioral pattern recognition to generate comprehensive @param, @return, @example, and @raise tags automatically.
+- **Use cases:** "Generate YARD docs for this file", "Add comprehensive documentation", "Document this Ruby class with examples".
 
 ## Skill Routing & Workflow
 
