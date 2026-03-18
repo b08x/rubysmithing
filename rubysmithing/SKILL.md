@@ -28,8 +28,9 @@ Triggers: "quick script", "simple utility", "one-off", "no dependencies", "stdli
 or a clearly small self-contained task.
 
 In Lite Mode:
+
 - Generate pure Ruby using stdlib only
-- No `dry-schema`, no `dry-types`, no `async`, no `breaker_machines`
+- No `dry-schema`, no `dry-types`, no `async`, no `circuit_breaker`
 - No `frozen_string_literal` mandate (still recommended, but not enforced)
 - Output a single file with a brief inline comment explaining any non-obvious choice
 - Do not suggest adding gems unless the user asks
@@ -41,6 +42,7 @@ Apply full conventions from `references/conventions.md`.
 ## Step 2: Detect Convention Target
 
 Scan for project signals in priority order:
+
 1. `.rubocop.yml` present → use RuboCop config
 2. `standard` in Gemfile → use StandardRB
 3. `.rubysmith` / `rubysmith` gem → use Rubysmith defaults
@@ -49,6 +51,7 @@ Scan for project signals in priority order:
 ## Step 3: Gem Context Check
 
 Before writing any code that touches a gem:
+
 - Note which gems are involved
 - State: "Deferring to rubysmithing-context for [gem] API verification"
 - In practice, if rubysmithing-context is active in the session and has already
@@ -75,7 +78,7 @@ Generate complete files. No truncation. No `# ... rest of implementation` stubs.
 - `module_function` not `extend self`
 - `journald-logger` not `puts`
 - `Async { }` not `Thread.new` for I/O
-- `breaker_machines` wrapping external API calls
+- `circuit_breaker` wrapping external API calls
 
 ## Output Format
 

@@ -207,20 +207,22 @@ end
 
 All external API calls must be wrapped:
 ```ruby
-require "breaker_machines"
+require "circuit_breaker"
 
 class LLMClient
-  include BreakerMachines::DSL
-
-  circuit_breaker :llm_api,
-    threshold: 5,
-    timeout: 30,
-    reset_timeout: 60
+  include CircuitBreaker
 
   def complete(prompt)
-    with_circuit_breaker(:llm_api) do
-      ruby_llm_call(prompt)
-    end
+    ruby_llm_call(prompt)
+  end
+
+  circuit_method :complete
+
+  circuit_handler do |handler|
+    handler.failure_threshold = 5
+    handler.failure_timeout = 60
+    handler.invocation_timeout = 30
+    handler.logger = LOGGER
   end
 end
 ```

@@ -1,6 +1,6 @@
 ---
 name: rubysmithing-context
-description: Gem API verification sub-skill for Ruby development. Automatically activates on first mention of any Ruby gem — especially ruby_llm, sequel, async, bubbletea, dspy.rb, pgvector, huh, dry-schema, breaker_machines, fast-mcp, or informers — and resolves current method signatures and usage examples via Context7 MCP before code is generated. Results are cached for the session. If Context7 resolution fails, injects an explicit [WARNING: Unverified API Syntax] block rather than silently guessing. Pairs with rubysmithing, rubysmithing-genai, and rubysmithing-tui as a prerequisite step.
+description: Gem API verification sub-skill for Ruby development. Automatically activates on first mention of any Ruby gem — especially ruby_llm, sequel, async, bubbletea, dspy.rb, pgvector, huh, dry-schema, circuit_breaker, fast-mcp, or informers — and resolves current method signatures and usage examples via Context7 MCP before code is generated. Results are cached for the session. If Context7 resolution fails, injects an explicit [WARNING: Unverified API Syntax] block rather than silently guessing. Pairs with rubysmithing, rubysmithing-genai, and rubysmithing-tui as a prerequisite step.
 ---
 
 # Rubysmithing — Context
@@ -18,7 +18,7 @@ warrant a fresh lookup (API surface changes frequently):
 - `dspy.rb`, `dspy-ruby_llm`
 - `sequel` (plugin API especially)
 - `async`, `falcon`
-- `breaker_machines`
+- `circuit_breaker`
 - `fast-mcp`
 - `informers`
 - `dry-schema`, `dry-types`
@@ -52,13 +52,14 @@ Use `Context7:query-docs` with a targeted query — not just the gem name.
 Query format: `"[gem] [specific pattern]"`
 
 Examples:
+
 ```
 "ruby_llm chat streaming tool calling"
 "sequel dataset filter pgvector similarity"
 "async fiber barrier timeout"
 "bubbletea model update view lifecycle"
 "huh form group select input validation"
-"breaker_machines circuit breaker threshold reset"
+"circuit_breaker circuit breaker threshold reset"
 "dspy.rb chain of thought signature module"
 ```
 
@@ -68,6 +69,7 @@ deprecation warnings or breaking changes noted in docs.
 ## Step 4: Cache and Return
 
 Add resolved gem to session cache. Return to the requesting skill:
+
 - Gem name + Context7 ID used
 - Relevant method signatures (verbatim from docs)
 - Minimal working example
@@ -105,6 +107,7 @@ Context7 lookups across separate sessions. The cache lives at:
 `~/.rubysmithing/context_cache.db`
 
 Schema:
+
 ```ruby
 # migrations/001_create_gem_cache.rb
 Sequel.migration do

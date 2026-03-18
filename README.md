@@ -28,42 +28,56 @@ A modular, convention-aware skill suite for Ruby development with AI assistance.
 
 All skills in the suite now support two primary execution modes:
 
-- **Lite Mode:** For scripts ≤ ~50 lines, quick utilities, or pure `stdlib` tasks. Omits architectural mandates (async, circuit breakers, dry-schema) for proportional effort.
-- **Standard Mode:** The default for project-level code. Enforces full stack conventions: `async` fibers, `breaker_machines`, `journald-logger`, `dry-schema` validation, and Zeitwerk compliance.
+- **Lite Mode:** For scripts ≤ ~50 lines, quick utilities, or pure `stdlib` tasks. Omits architectural mandates (async, circuit_breaker, dry-schema) for proportional effort.
+- **Standard Mode:** The default for project-level code. Enforces full stack conventions: `async` fibers, `circuit_breaker`, `journald-logger`, `dry-schema` validation, and Zeitwerk compliance.
 
 ## Skills Overview
 
 ### rubysmithing (The Hub)
+
 The central entry point. Routes complex requests to sub-skills and handles direct generation for POROs, Rake tasks, and config wiring.
+
 - **What's new:** Hub skill moved to `rubysmithing/`. Lite vs. Standard mode detection.
 - **Use cases:** "Create a service object", "Write a one-off cleanup script (Lite)", "Add a gem to Gemfile".
 
 ### rubysmithing-context
+
 Resolves live gem documentation using Context7.
+
 - **What's new:** Added `context_cache.rb` to persist gem resolution data, preventing redundant API calls.
 - **Use cases:** "How do I use `ruby_llm` with tool calling?", "What is the latest `bubbletea` update syntax?".
 
 ### rubysmithing-report
+
 QA assessment engine implementing the **SIFT Protocol V1.0**.
+
 - **What's new:** Specialized "System Design Review" and "Tech Advisory" (700-char critical summary) modes.
 - **Use cases:** "Assess this codebase for convention violations", "System design review for this RAG architecture".
 
 ### rubysmithing-tui
+
 Terminal UI scaffolder for the Ruby Charm/Bubble ecosystem.
+
 - **What's new:** Introduces a `Components::Base` adapter pattern in every scaffold to isolate UI code from Bubble gem API churn.
 - **Use cases:** "Build a file browser TUI", "Scaffold a RAG configuration panel".
 
 ### rubysmithing-genai
+
 Scaffolds AI/NLP components (Chat agents, RAG pipelines, DSPy modules, MCP servers).
+
 - **Use cases:** "Build a chatbot with streaming responses", "Implement a DSPy chain-of-thought module".
 
 ### rubysmithing-refactor
+
 Rewrites code to follow conventions.
+
 - **What's new:** Now uses a "Pre-Refactor Audit" phase before generating code to ensure transparency.
 - **Use cases:** "Convert Thread.new to Async fiber", "Fix Zeitwerk compliance issues".
 
 ### rubysmithing-yardoc
+
 YARD documentation generator with semantic analysis and type inference.
+
 - **What's new:** Advanced AST parsing and behavioral pattern recognition to generate comprehensive @param, @return, @example, and @raise tags automatically.
 - **Use cases:** "Generate YARD docs for this file", "Add comprehensive documentation", "Document this Ruby class with examples".
 
@@ -84,7 +98,7 @@ The suite is optimized for a terminal-native, high-resilience Ruby stack:
 |-------|------|
 | **TUI** | bubbletea, lipgloss, bubbles, huh, gum, ntcharts |
 | **AI** | ruby_llm, dspy.rb, ruby_llm-mcp |
-| **Async** | async, breaker_machines |
+| **Async** | async, circuit_breaker |
 | **Storage** | sequel, pgvector, dry-types, dry-schema |
 | **Logic** | zeitwerk, dotenv, tty-config |
 | **Logging** | journald-logger |

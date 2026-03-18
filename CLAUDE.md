@@ -27,12 +27,14 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 ## Execution Modes
 
 ### Lite Mode (≤50 lines or simple scripts)
+
 - Pure Ruby stdlib only
-- No `dry-schema`, `async`, `breaker_machines`
+- No `dry-schema`, `async`, `circuit_breaker`
 - No architectural mandates
 - Triggered by: "quick script", "simple utility", "one-off", "stdlib only"
 
 ### Standard Mode (default)
+
 - Full stack conventions enforced
 - Async fibers, circuit breakers, structured logging
 - Zeitwerk compliance required
@@ -44,7 +46,7 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 |-------|------|
 | **TUI** | bubbletea, lipgloss, bubbles, huh, gum, ntcharts |
 | **AI** | ruby_llm, dspy.rb, ruby_llm-mcp |
-| **Async** | async, breaker_machines |
+| **Async** | async, circuit_breaker |
 | **Storage** | sequel, pgvector, dry-types, dry-schema |
 | **Logic** | zeitwerk, dotenv, tty-config |
 | **Logging** | journald-logger |
@@ -59,10 +61,12 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 ## Key Conventions (Standard Mode)
 
 ### File Structure
+
 - Zeitwerk compliance: file paths must mirror module/class hierarchy exactly
 - `lib/app_name/data/processor.rb` → `AppName::Data::Processor`
 
 ### Code Style
+
 - Two-space indent, no tabs
 - `snake_case` methods/vars, `CamelCase` classes, `SCREAMING_SNAKE` constants
 - `Struct.new(keyword_init: true)` for value objects
@@ -71,8 +75,9 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 - `module_function` not `extend self`
 
 ### Async & Reliability
+
 - `Async { }` blocks instead of `Thread.new` for I/O
-- `breaker_machines` wrapping all external API calls
+- `circuit_breaker` wrapping all external API calls
 - `journald-logger` for structured logging, never `puts`
 
 ## TUI Architecture Pattern
@@ -93,19 +98,24 @@ All screens call `Components::Base.panel(...)` instead of Bubble APIs directly.
 ## Development Workflow
 
 ### Creating New Skills
+
 Each skill requires:
+
 - `SKILL.md` with name, description, triggers, and step-by-step workflow
 - `references/` directory with domain-specific patterns and conventions
 - Clear activation triggers and delegation rules to other skills
 
 ### Generating Code
+
 - Always run `rubysmithing-context` first for gem API verification
 - Generate complete files - no truncation or stubs
 - Include file path, complete content, rationale, and Gemfile additions
 - Specify which mode was applied (Lite/Standard + convention target)
 
 ### Working with Skeletons
+
 TUI applications copy from `rubysmithing-tui/assets/skeleton/` and rename throughout:
+
 - `app_name` → actual snake_case name
 - `AppName` → actual CamelCase module
 - `APP_NAME` → actual SCREAMING_SNAKE constant
@@ -113,6 +123,7 @@ TUI applications copy from `rubysmithing-tui/assets/skeleton/` and rename throug
 ## No Build System
 
 This repository contains skill definitions, not executable code. There are no:
+
 - Test suites (specs only generated on explicit request for TUI Update functions)
 - Build scripts or Rakefile
 - Package managers beyond individual skill Gemfiles

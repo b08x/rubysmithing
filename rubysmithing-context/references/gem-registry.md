@@ -60,7 +60,7 @@ Last updated: 2026-03
 | falcon | `/socketry/falcon` | Async HTTP server | Rack-compatible, fiber scheduler |
 | gush | `/chaps-io/gush` | DAG workflow engine | Job definition, workflow creation, Redis backend |
 | faraday | — | HTTP client | No Context7 entry; API is stable |
-| breaker_machines | `/seuros/breaker_machines` | Circuit breaker | State machine-based, thread-safe |
+| circuit_breaker | `/wsargent/circuit_breaker` | Circuit breaker | State machine-based, thread-safe |
 
 ---
 
@@ -78,6 +78,7 @@ Last updated: 2026-03
 | deepsearch-rb | — | Web research | No Context7 entry |
 
 **Additional Context7 docs for AI layer:**
+
 - `/websites/rubyllm` — RubyLLM website docs (use for high-level patterns)
 - `/websites/spacy_io` — spaCy docs (use alongside ruby-spacy for pipeline concepts)
 - `/explosion/spacy-llm` — spaCy LLM integration patterns
@@ -128,33 +129,39 @@ Last updated: 2026-03
 Use these to determine which gems to resolve via Context7 for a given project type.
 
 ### Minimal CLI Tool
+
 ```
 Runtime spine + drydock/highline + journald-logger
 ```
 
 ### Terminal AI App (basic chatbot)
+
 ```
 Runtime spine + bubbletea + lipgloss + ruby_llm + circuit_breaker + async
 ```
 
 ### RAG Application
+
 ```
 Runtime spine + bubbletea + ruby_llm + pgvector + sequel + pg
 + pragmatic_segmenter + async + circuit_breaker
 ```
 
 ### Agent with Tool-Calling
+
 ```
 Runtime spine + bubbletea + ruby_llm + ruby_llm-mcp + dspy.rb + dspy-ruby_llm
 + async + gush + circuit_breaker + redis + ohm
 ```
 
 ### File Processing / Export Tool (e.g. GDrive browser)
+
 ```
 Runtime spine + bubbletea + lipgloss + huh + glamour + gum + async + faraday
 ```
 
 ### Full AI Orchestration Stack
+
 ```
 All gems — use the full emergent architecture diagram from the dependency mapping doc
 ```
