@@ -1,174 +1,88 @@
-# Ruby Agent Skills
+# Ruby Agent Skills v1.0
 
-A modular skill suite for Ruby development with AI assistance. These skills handle code generation, refactoring, quality assessment, documentation lookup, terminal UI building, and AI/NLP integration.
+A modular, convention-aware skill suite for Ruby development with AI assistance. These skills handle code generation, refactoring, quality assessment, terminal UI building, and GenAI orchestration.
+
+## Architecture
+
+```text
+/
+├── rubysmithing/              # Hub skill: routes tasks, handles simple Ruby gen
+│   ├── SKILL.md
+│   └── references/
+│       └── conventions.md     # Core Ruby/Stack idioms
+├── rubysmithing-context/      # Gem API verification (Context7)
+│   ├── SKILL.md
+│   ├── scripts/
+│   │   └── context_cache.rb   # Persistent gem resolution
+│   └── references/
+│       └── gem-registry.md
+├── rubysmithing-genai/        # AI/NLP scaffolding & patterns
+├── rubysmithing-refactor/     # Targeted convention fixes
+├── rubysmithing-report/       # SIFT Protocol V1.0 QA assessments
+└── rubysmithing-tui/          # Terminal UI building with adapter pattern
+    └── assets/skeleton/       # Standardized TUI project structure
+```
+
+## Core Execution Modes
+
+All skills in the suite now support two primary execution modes:
+
+- **Lite Mode:** For scripts ≤ ~50 lines, quick utilities, or pure `stdlib` tasks. Omits architectural mandates (async, circuit breakers, dry-schema) for proportional effort.
+- **Standard Mode:** The default for project-level code. Enforces full stack conventions: `async` fibers, `breaker_machines`, `journald-logger`, `dry-schema` validation, and Zeitwerk compliance.
 
 ## Skills Overview
 
-### rubysmithing
-
-The central hub skill. Acts as a convention-aware Ruby code generator that routes requests to specialized sub-skills or generates code directly.
-
-**What it does:**
-- Generates idiomatic Ruby classes, modules, scripts, and project components
-- Detects project conventions (RuboCop, StandardRB, Rubysmith)
-- Escalates complex requests to appropriate sub-skills
-
-**Use cases:**
-- "Create a service object for user authentication"
-- "Generate a Rake task for database cleanup"
-- "Add a new gem to the Gemfile with rationale"
-- "Scaffold a config layer with dotenv and tty-config"
+### rubysmithing (The Hub)
+The central entry point. Routes complex requests to sub-skills and handles direct generation for POROs, Rake tasks, and config wiring.
+- **What's new:** Hub skill moved to `rubysmithing/`. Lite vs. Standard mode detection.
+- **Use cases:** "Create a service object", "Write a one-off cleanup script (Lite)", "Add a gem to Gemfile".
 
 ### rubysmithing-context
-
-Automatically resolves current API syntax for Ruby gems using Context7 MCP. Fires on first gem mention and caches results.
-
-**What it does:**
-- Queries Context7 for live gem documentation
-- Provides method signatures and working examples
-- Prevents stale-syntax errors in generated code
-
-**Use cases:**
-- Any request involving gems like ruby_llm, sequel, async, bubbletea
-- "How do I use ruby_llm with tool calling?"
-- "What's the current syntax for BubbleTea model update?"
-- Before implementing any gem-specific code
-
-### rubysmithing-genai
-
-Scaffolds AI/NLP components and advises on integration patterns.
-
-**What it does:**
-- Generates LLM chat agents, RAG pipelines, DSPy modules
-- Creates embedding generators and NLP processors
-- Provides architectural guidance for AI integration
-
-**Use cases:**
-- "Build a chatbot with streaming responses"
-- "Create a RAG pipeline with pgvector"
-- "Implement a DSPy chain-of-thought module"
-- "How do I connect MCP tools to ruby_llm?"
-
-### rubysmithing-refactor
-
-Rewrites existing Ruby code to comply with project conventions and architectural patterns.
-
-**What it does:**
-- Detects convention target from project config
-- Applies anti-pattern corrections
-- Restructures for Zeitwerk compliance
-
-**Use cases:**
-- "Refactor this to use module_function instead of extend self"
-- "Convert Thread.new to Async fiber"
-- "Fix Zeitwerk autoload issues in this module"
-- "Apply Dry::Schema to these params"
+Resolves live gem documentation using Context7.
+- **What's new:** Added `context_cache.rb` to persist gem resolution data, preventing redundant API calls.
+- **Use cases:** "How do I use `ruby_llm` with tool calling?", "What is the latest `bubbletea` update syntax?".
 
 ### rubysmithing-report
-
-Code quality assessment engine implementing the SIFT (Software & Systems QA Protocol).
-
-**What it does:**
-- Produces structured 8-section SIFT reports
-- Identifies architectural violations and anti-patterns
-- Provides feasibility ratings and recommendations
-
-**Use cases:**
-- "Assess this codebase for convention violations"
-- "Give me a code quality report on these files"
-- "What's wrong with this Ruby code?"
-- "System design review for this architecture"
+QA assessment engine implementing the **SIFT Protocol V1.0**.
+- **What's new:** Specialized "System Design Review" and "Tech Advisory" (700-char critical summary) modes.
+- **Use cases:** "Assess this codebase for convention violations", "System design review for this RAG architecture".
 
 ### rubysmithing-tui
+Terminal UI scaffolder for the Ruby Charm/Bubble ecosystem.
+- **What's new:** Introduces a `Components::Base` adapter pattern in every scaffold to isolate UI code from Bubble gem API churn.
+- **Use cases:** "Build a file browser TUI", "Scaffold a RAG configuration panel".
 
-Scaffolds terminal UI applications using the Charm/Bubble ecosystem.
+### rubysmithing-genai
+Scaffolds AI/NLP components (Chat agents, RAG pipelines, DSPy modules, MCP servers).
+- **Use cases:** "Build a chatbot with streaming responses", "Implement a DSPy chain-of-thought module".
 
-**What it does:**
-- Generates BubbleTea apps with Model/Update/View pattern
-- Creates Lipgloss layouts and component trees
-- Produces full skeleton structure for TUI projects
+### rubysmithing-refactor
+Rewrites code to follow conventions.
+- **What's new:** Now uses a "Pre-Refactor Audit" phase before generating code to ensure transparency.
+- **Use cases:** "Convert Thread.new to Async fiber", "Fix Zeitwerk compliance issues".
 
-**Use cases:**
-- "Build a file browser TUI"
-- "Create a RAG configuration panel"
-- "Scaffold an agent control panel dashboard"
-- "Add a form to my existing BubbleTea app"
+## Skill Routing & Workflow
 
-## Skill Routing
+The hub automatically determines the best path:
 
-The hub skill (`rubysmithing`) automatically routes requests:
-
-```
-Request → rubysmithing (hub)
-           │
-           ├─→ Direct generation (simple Ruby code)
-           │
-           ├─→ rubysmithing-genai (AI/NLP tasks)
-           │
-           ├─→ rubysmithing-tui (terminal UI)
-           │
-           ├─→ rubysmithing-refactor (rewriting existing code)
-           │
-           ├─→ rubysmithing-report (assessment/audit)
-           │
-           └─→ rubysmithing-context (gem lookup — always fires first when needed)
-```
-
-## Combining Skills
-
-Skills work together in sequence. The typical flow:
-
-1. **rubysmithing-context** resolves gem APIs
-2. **rubysmithing-genai** or **rubysmithing-tui** generates implementation
-3. **rubysmithing-refactor** cleans up if needed
-4. **rubysmithing-report** validates quality
-
-### Example: Building an AI-Powered TUI
-
-```
-User: "Create a terminal app that lets me chat with a RAG system"
-
-rubysmithing (hub)
-  → rubysmithing-context (resolve ruby_llm, bubbletea, sequel APIs)
-  → rubysmithing-tui (scaffold BubbleTea app structure)
-  → rubysmithing-genai (generate RAG pipeline + chat component)
-```
-
-### Example: Improving Existing Code
-
-```
-User: "This Ruby file has Zeitwerk issues and uses threads"
-
-rubysmithing (hub)
-  → rubysmithing-refactor (audit + fix)
-  → rubysmithing-report (validate quality after refactor)
-```
-
-### Example: Full Stack Assessment
-
-```
-User: "Audit my Ruby project and tell me what's wrong"
-
-rubysmithing (hub)
-  → rubysmithing-report (full SIFT assessment)
-  → rubysmithing-refactor (apply fixes for critical issues)
-  → rubysmithing-report (re-verify)
-```
+1. **rubysmithing-context** verifies gem APIs.
+2. **rubysmithing** (Hub) chooses **Lite** or **Standard** mode.
+3. Sub-skills generate or refactor components.
+4. **rubysmithing-report** provides the final QA validation.
 
 ## Project Stack Reference
 
-These skills assume a terminal-native Ruby stack:
+The suite is optimized for a terminal-native, high-resilience Ruby stack:
 
 | Layer | Gems |
 |-------|------|
-| TUI | bubbletea, lipgloss, bubbles, huh, gum, ntcharts |
-| AI | ruby_llm, dspy.rb, ruby_llm-mcp |
-| Async | async, circuit_breaker |
-| Storage | sequel, pgvector, dry-types, dry-schema |
-| NLP | ruby-spacy, pragmatic_segmenter |
-| Config | tty-config, dotenv |
-| Logging | journald-logger |
+| **TUI** | bubbletea, lipgloss, bubbles, huh, gum, ntcharts |
+| **AI** | ruby_llm, dspy.rb, ruby_llm-mcp |
+| **Async** | async, breaker_machines |
+| **Storage** | sequel, pgvector, dry-types, dry-schema |
+| **Logic** | zeitwerk, dotenv, tty-config |
+| **Logging** | journald-logger |
 
 ## Installation
 
-These skills integrate with Claude Code or OpenCode. Place the skill files in your skills directory and reference them by name in your prompts.
+Place these directories in your skills path. Reference `rubysmithing` as the primary hub; it will escalate to sub-skills as needed.
