@@ -1,6 +1,6 @@
 ---
 name: rubysmithing-tui
-description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Bubbles, bubbles (UI components), Huh, huh form, Gum, gum prompts, NTCharts, Bubblezone, Glamour, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, text input, spinner, list selection, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
+description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Bubbles, bubbles (UI components), Huh, huh form, form validation, Gum, gum prompts, NTCharts, charts, data visualization, Bubblezone, Glamour, glamour rendering, markdown display, Harmonica, harmonica animations, spring physics, smooth transitions, animated scrolling, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, text input, spinner, list selection, metrics display, animated transitions, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
 ---
 
 # Rubysmithing — TUI
@@ -13,7 +13,7 @@ Always produces a full skeleton. Generates against verified API syntax only.
 Before generating any scaffold or component code:
 
 1. **Activate rubysmithing-context** for each Bubble gem involved:
-   bubbletea, lipgloss, bubbles (UI components), and any of: huh, gum, ntcharts, bubblezone, glamour, harmonica.
+   bubbletea, lipgloss, bubbles (UI components), huh (forms), glamour (markdown), ntcharts (visualization), harmonica (animations), and any of: gum, bubblezone.
    Generate no component code until API syntax is confirmed or WARNING block is injected.
 
 2. **Extract domain** from the request — what does this TUI control or display?
@@ -114,6 +114,64 @@ module AppName
       def self.prompt_filter(items, **options)
         Gum.filter(items, **options)
       end
+
+      # Huh form components (for complex forms)
+      def self.form_input(key:, title:, **options)
+        Huh.input.key(key).title(title).tap do |input|
+          options.each { |k, v| input.public_send(k, v) }
+        end
+      end
+
+      def self.form_select(key:, title:, options:, **config)
+        Huh.select.key(key).title(title).options(*options).tap do |select|
+          config.each { |k, v| select.public_send(k, v) }
+        end
+      end
+
+      def self.form_confirm(key:, title:, **options)
+        Huh.confirm.key(key).title(title).tap do |confirm|
+          options.each { |k, v| confirm.public_send(k, v) }
+        end
+      end
+
+      # Glamour markdown rendering
+      def self.render_markdown(content, **options)
+        Glamour.render(content, **options)
+      end
+
+      def self.markdown_renderer(**options)
+        Glamour::Renderer.new(**options)
+      end
+
+      # NTCharts data visualization
+      def self.line_chart(width, height, min_x, max_x, min_y, max_y)
+        Ntcharts::Linechart.new(width, height, min_x, max_x, min_y, max_y)
+      end
+
+      def self.time_series_chart(width, height)
+        Ntcharts::Timeserieslinechart.new(width, height)
+      end
+
+      def self.bar_chart(width, height)
+        Ntcharts::Barchart.new(width, height)
+      end
+
+      # Harmonica spring animations
+      def self.spring_animation(fps: 60, frequency: 6.0, damping: 0.5)
+        Harmonica::Spring.new(
+          delta_time: Harmonica.fps(fps),
+          angular_frequency: frequency,
+          damping_ratio: damping
+        )
+      end
+
+      def self.smooth_spring(fps: 60)
+        spring_animation(fps: fps, frequency: 5.0, damping: 1.0)  # Critically damped
+      end
+
+      def self.bouncy_spring(fps: 60)
+        spring_animation(fps: fps, frequency: 6.0, damping: 0.3)  # Bouncy
+      end
     end
   end
 end
@@ -143,8 +201,14 @@ Load `references/tui-patterns.md` for:
 - Bubbles::Cursor for custom text cursors
 - Bubbles::Help for key binding documentation
 - Gum utility functions for external prompts
-- Huh form component
-- NTCharts metrics panel
+- Huh form components with validation and themes
+- Huh input, select, and confirm fields
+- Glamour markdown rendering with custom styles
+- Glamour renderer instances for consistent formatting
+- NTCharts line charts and time series visualization
+- NTCharts bar charts and data display
+- Harmonica spring animations for smooth transitions
+- Harmonica animated scrolling and UI state changes
 - Mouse zones (bubblezone)
 - Streaming output component
 - Human-in-the-loop component
@@ -154,12 +218,16 @@ Load `references/tui-patterns.md` for:
 
 | Domain | Screens | Key Components |
 | :---- | :---- | :---- |
-| File browser (GDrive etc.) | Browser, Editor, Export | FileList (Bubbles::List), PreviewPane, StatusBar, ActionMenu |
-| RAG configurator | Config, Ingest, Query, HIL | ParamForm (Bubbles::TextInput), ChunkingOptions, ResultsViewer, HilReview |
-| Agent control panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput, Intervention (Gum prompts) |
-| Monitoring / metrics | Dashboard | MetricsChart, LogViewer, StatusGrid, LoadingSpinner (Bubbles::Spinner) |
-| Data entry forms | Input, Validation, Review | TextInput (Bubbles::TextInput), FormFields, ValidationPanel |
-| Search/Filter interfaces | Search, Results, Filter | SearchInput, FilteredList (Bubbles::List), ResultsPane |
+| File browser (GDrive etc.) | Browser, Editor, Export | AnimatedFileList (Bubbles::List + Harmonica), PreviewPane (Glamour), StatusBar, ActionMenu |
+| RAG configurator | Config, Ingest, Query, HIL | ConfigForm (Huh::Form), ChunkingOptions, ResultsViewer (Glamour), HilReview |
+| Agent control panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput (Glamour), Intervention (Gum prompts) |
+| Monitoring / metrics | Dashboard | MetricsChart (NTCharts), LogViewer (Glamour), StatusGrid, LoadingSpinner (Bubbles::Spinner) |
+| Data entry forms | Input, Validation, Review | ConfigForm (Huh::Form), FormFields, ValidationPanel |
+| Search/Filter interfaces | Search, Results, Filter | SearchInput (Bubbles::TextInput), FilteredList (Bubbles::List + Harmonica), ResultsPane |
+| Documentation viewer | Reader, Search, TOC | ContentViewer (Glamour), AnimatedNavigation (Bubbles::List + Harmonica), SearchBar |
+| Analytics dashboard | Overview, Charts, Reports | TimeSeriesChart (NTCharts), MetricsPanels, DataTable (Bubbles::List) |
+| Interactive tutorials | Steps, Progress, Navigation | ProgressBar (Harmonica), StepNavigation, ContentDisplay (Glamour) |
+| Live data feeds | Stream, Filters, Controls | SmoothScrolling (Harmonica), DataList (Bubbles::List), FilterControls |
 
 ## Output Format
 
