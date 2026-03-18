@@ -1,100 +1,68 @@
 ---
 name: rubysmithing-report
-description: Rubysmith QA assessment sub-skill implementing the SIFT (Software & Systems QA Protocol). Use when the task is to audit Ruby code, a project directory, uploaded files, or pasted snippets for Rubysmith compliance, architectural violations, anti-patterns, and code quality. Produces a structured 8-section SIFT report from the perspective of the Rubysmith Pragmatist persona. Also supports two focused modes: "system design review" (deep architectural analysis) and "tech advisory" (700-character critical advisory with links). Accepts pasted code, uploaded files, or filesystem paths.
+description: Rubysmith QA assessment sub-skill implementing the SIFT Protocol V1.0. Activates on any mention of: assess, audit, review this project, code quality, convention violations, what's wrong with this code, score my code, how compliant is this, system design review, tech advisory, SIFT, Rubysmith QA, Caliber, Reek, dry-monads compliance, pipeline depth, god class, missing DI, or any request for a structured code quality report. Accepts pasted code, uploaded files, or filesystem paths. Produces an 8-section SIFT report from the Rubysmith Pragmatist persona. Supports two focused modes: "system design review" (structured architectural deep-dive) and "tech advisory" (700-character critical advisory with links).
 ---
 
 # Rubysmithing — Report
 
 Rubysmith QA assessment engine implementing the SIFT Protocol V1.0.
-Evaluates Ruby code through the lens of the Rubysmith Pragmatist persona:
-strict Ruby 3.2+, functional pipelines, monadic error handling, DI, Zeitwerk.
+Evaluates Ruby code through the Rubysmith Pragmatist lens: Ruby 3.2+,
+functional pipelines, monadic error handling, rigorous DI, Zeitwerk.
 
 ## Architecture
 
 ```
-rubysmithing-report/SKILL.md          — This file: activation + mode routing
-rubysmithing-report/references/
-  sift-protocol.md                    — Full SIFT persona, analysis framework,
-                                        evidence types, Toulmin method, formatting rules
-  sift-templates.md                   — Two hotkey templates:
-                                        "system design review" / "tech advisory"
+rubysmithing-report/SKILL.md
+  references/sift-protocol.md    — Full SIFT V1.0 persona, 8-section format,
+                                   evidence framework, Toulmin method,
+                                   wit guidelines, formatting rules, QA checklist
+  references/sift-templates.md   — Hotkey templates:
+                                   "system design review" / "tech advisory"
 ```
 
-## Activation
+## Step 1: Load Protocol
 
-Load `references/sift-protocol.md` immediately and apply the Rubysmith Pragmatist
+Load `references/sift-protocol.md` immediately. Apply the Rubysmith Pragmatist
 persona and all formatting rules before producing any output.
 
-## Inputs Accepted
+## Step 2: Detect Mode
 
-- **Pasted code** — inline snippet; assessed against detected or community conventions
-- **Uploaded files** — read from `/mnt/user-data/uploads/`
-- **Filesystem path** — scan via bash tools
-- **Multiple files** — process in dependency order (base classes → dependents)
+### Default — Full SIFT Report
+Triggered by: assess, audit, review, report, what's wrong, code quality, convention
+violations, score my code, or a general code paste.
 
-## Mode Detection
+Execute the 8-section SIFT output format from `references/sift-protocol.md`.
 
-### Default Mode — Full SIFT Report
-Triggered by: "assess", "audit", "review", "report", "what's wrong with",
-"code quality", "convention violations", "score my code", general code paste.
+### System Design Review
+Triggered by: "system design review", "architecture review", "review this design",
+or `[hotkey="system design review"]`.
 
-Execute the full 8-section SIFT response format from `references/sift-protocol.md`:
-1. ✅ Verified Specifications/Components Table
-2. ⚠️ Identified Issues, Risks & Suggested Improvements Table
-3. 📌 Issue & Improvement Summary
-4. 💡 Potential Optimizations/Integrations
-5. 🛠️ Assessment of Resources & Tools Table
-6. ⚙️ Revised System/Module Overview (Incorporating Feedback)
-7. 🏅 Technical Feasibility & Recommendation
-8. 📘 Rubysmith Best Practice Suggestion
+Use the structured review template from `references/sift-templates.md`.
 
-### System Design Review Mode
-Triggered by: "system design review", "architecture review", "design assessment",
-"review this design", or explicit `[hotkey="system design review"]`.
-
-Use the structured review template from `references/sift-templates.md`:
-- Core Assessment (4–6 bullet points)
-- Expanded Analysis (goal, strengths, concerns, risks, recommendations, context)
-
-### Tech Advisory Mode
+### Tech Advisory
 Triggered by: "tech advisory", "quick advisory", "critical issues only",
-or explicit `[hotkey="tech advisory"]`.
+or `[hotkey="tech advisory"]`.
 
-Run a condensed system review, then produce:
-- Advisory capped at 700 characters
-- 2–5 supporting links in bare link format
-- Focus: only critical issues needing immediate attention
+Condensed review → 700-character advisory + 2–5 bare links. Critical issues only.
 
-## Convention Detection
+## Step 3: Detect Convention Target
 
-Before analysis, scan for project convention signals (same as hub):
+Same detection order as all other sub-skills:
 1. `.rubocop.yml` → RuboCop
-2. `standard` gem in Gemfile → StandardRB
+2. `standard` in Gemfile → StandardRB
 3. `.rubysmith` / `rubysmith` gem → Rubysmith defaults
 4. None → community idioms + Rubysmith architectural standards
 
 Report which target was detected and from which artifact.
 
-## First Response Behavior
+## Step 4: First Response Protocol
 
-On first input in a session, follow the First Response protocol from `references/sift-protocol.md`:
-- Note current date
-- Identify what the user is likely trying to achieve
-- Offer a numbered list of potential analysis tasks before proceeding
+On first input: note current date, identify what the user is likely trying to achieve,
+offer a numbered list of potential analysis tasks before proceeding.
+(See `references/sift-protocol.md` — First Response section.)
 
 ## Integration with rubysmithing-refactor
 
-The SIFT report output is designed to feed directly into `rubysmithing-refactor`.
-The Issues table `Item` field and issue type map to named patterns in
+SIFT Issues table `Item` fields and issue type labels map to named patterns in
 `rubysmithing-refactor/references/refactor-patterns.md`.
 When suggesting fixes, reference the pattern name where one exists.
-
-## Output Format Notes
-
-All output follows SIFT formatting rules from `references/sift-protocol.md`:
-- Triple asterisks `***` before/after major section breaks
-- H2 for primary sections, H3 for subsections
-- All tables in proper markdown (pipe-delimited)
-- En dash (–) for numerical ranges, not hyphen
-- Citations as `[Resource Name](url)` inline before the period
-- Wit: technically grounded, Rubysmith-specific, insight-bearing — not decorative

@@ -1,78 +1,85 @@
 ---
 name: rubysmithing-refactor
-description: Convention-targeted Ruby refactoring sub-skill. Use when the task is to rewrite existing Ruby code to comply with detected project conventions (RuboCop, StandardRB, or Rubysmith), eliminate anti-patterns, restructure for Zeitwerk compliance, or apply architectural patterns from the rubysmithing stack (Dry::Types, async fibers, circuit breakers). Accepts pasted code snippets, uploaded files, or filesystem paths. Always detects convention target from project config before applying changes.
+description: Convention-targeted Ruby refactoring sub-skill. Activates on any mention of: refactor, clean up, fix conventions, this code is messy, help me improve this, anti-patterns, rubocop violations, Zeitwerk compliance, autoload issue, make this idiomatic, extend self, frozen string literal missing, thread usage, hardcoded config, silent rescue, or missing namespace. Accepts pasted code snippets, uploaded files, or filesystem paths. Detects convention target from project config (RuboCop, StandardRB, Rubysmith) before applying changes. Produces pre-refactor audit + complete refactored file + change log. Applies Lite Mode bypass for scripts under ~50 lines where architectural mandates would be disproportionate.
 ---
 
 # Rubysmithing — Refactor
 
-Targeted refactoring of existing Ruby code toward project-detected conventions
-and stack-specific architectural patterns.
+Targeted refactoring of existing Ruby code toward project-detected conventions.
+Always audits before rewriting. Never silently drops functionality.
 
 ## Inputs Accepted
 
-- **Pasted snippet** — inline code in the conversation
-- **Uploaded file** — read from `/mnt/user-data/uploads/`
-- **Filesystem path** — read via bash tools from a project directory
-- **Multiple files** — accepted; process each in dependency order (base classes first)
+- Pasted snippet — inline code in the conversation
+- Uploaded file — from `/mnt/user-data/uploads/`
+- Filesystem path — via bash tools
+- Multiple files — process in dependency order (base classes first)
 
-## Refactor Workflow
+**Compound prompts** (e.g., "refactor this RAG pipeline AND build a TUI for it"):
+Handle the refactoring component here. State:
+"Handling refactor. TUI scaffolding should be addressed with rubysmithing-tui."
 
-### Step 1: Detect Convention Target
+## Step 1: Detect Convention Target
 
-Scan project root for (in priority order):
-1. `.rubocop.yml` → parse enabled cops, custom rules, target Ruby version
-2. `Gemfile` containing `gem "standard"` → apply StandardRB rules
-3. `.rubysmith` or `Gemfile` containing `gem "rubysmith"` → apply Rubysmith defaults
-4. Nothing found → apply community idioms from `references/refactor-patterns.md`
+Priority order:
+1. `.rubocop.yml` → RuboCop (parse enabled cops, target Ruby version)
+2. `standard` in Gemfile → StandardRB
+3. `.rubysmith` / `rubysmith` gem → Rubysmith defaults
+4. None → community idioms from `references/refactor-patterns.md`
 
-### Step 2: Audit Before Changing
+## Step 2: Detect Mode
 
-Before rewriting, produce a brief pre-refactor audit:
+### Lite Mode
+Apply when: file is ≤ ~50 lines, or request is clearly a simple utility script.
+
+Lite Mode refactor scope:
+- Style fixes only (frozen string literal, indent, naming, guard clauses)
+- Do NOT add async, circuit breakers, or dry-schema
+- Do NOT mandate journald-logger for a one-off script
+- Note: "Lite Mode applied — architectural mandates omitted (disproportionate for scope)"
+
+### Standard Mode
+Apply for all other inputs. Full pattern catalog from `references/refactor-patterns.md`.
+
+## Step 3: Pre-Refactor Audit
+
+Before rewriting, output a brief audit:
+
 ```
 FILE: lib/my_app/processor.rb
 Convention target: RuboCop (.rubocop.yml detected)
-Issues found:
-  [CRITICAL] No frozen_string_literal magic comment
-  [CRITICAL] Thread usage — should be Async fiber
-  [WARNING]  extend self on utility module — use module_function
-  [WARNING]  Nested conditionals (depth 3) — use guard clauses
-  [INFO]     File/class name mismatch — Zeitwerk will fail to autoload
+Mode: Standard
+
+CRITICAL
+  [line 3]  Thread.new usage — use Async fiber            [thread_to_async]
+  [line 1]  No frozen_string_literal                      [missing_frozen_string_literal]
+WARNING
+  [line 8]  extend self — use module_function             [extend_self_to_module_function]
+  [line 22] Nested conditionals depth 3 — guard clauses  [nested_conditionals]
+INFO
+  [line 1]  No namespace wrapper                          [missing_namespace]
 ```
 
-### Step 3: Refactor
+Pattern names in brackets map to `references/refactor-patterns.md`.
 
-Apply changes from `references/refactor-patterns.md`. For each change:
-- Show the before/after diff for non-trivial transformations
-- Add an inline comment if the refactored pattern is non-obvious
-- Never silently drop functionality — flag if a change alters behavior
+## Step 4: Refactor
 
-### Step 4: Verify Zeitwerk Compliance
+Apply changes. For each non-trivial transformation:
+- Show before/after inline for any change that alters behavior
+- Add inline comment if refactored pattern is non-obvious
+- Flag explicitly if a change alters observable behavior
 
-After refactoring, confirm:
-- Module/class name matches file path exactly (e.g. `MyApp::DataProcessor` → `lib/my_app/data_processor.rb`)
-- No `require` statements for files that Zeitwerk should autoload
-- `loader.collapse` or `loader.push_dir` used correctly for non-standard paths
+## Step 5: Verify Zeitwerk Compliance
 
-## Common Refactor Patterns
-
-See `references/refactor-patterns.md` for full catalog. Key patterns:
-
-| Anti-pattern | Target pattern |
-|---|---|
-| `extend self` on utility module | `module_function` |
-| Raw `Thread.new` | `Async { }` fiber block |
-| `puts` / `STDOUT` logging | `Journald::Logger` |
-| Hardcoded config values | `tty-config` + `.env` |
-| Bare `rescue Exception` | Named error class rescue |
-| `rescue => e; nil` | Explicit handling or re-raise |
-| 3+ positional args | Keyword arguments |
-| Deep nested `if/elsif` | Guard clauses |
-| Ad-hoc hash validation | `Dry::Schema.Params` |
+Confirm post-refactor:
+- Module/class name matches file path exactly
+- No `require` for Zeitwerk-managed files
+- `loader.collapse` / `loader.push_dir` used correctly for non-standard paths
 
 ## Output Format
 
-For each refactored file:
-1. Pre-refactor audit summary (issues found, severity)
-2. Complete refactored file — no diffs only, always provide the full file
-3. Change log: bullet list of what changed and why
-4. Any behavior changes flagged explicitly
+1. Pre-refactor audit (issues, severity, pattern key)
+2. Complete refactored file — always full file, never diff-only
+3. Change log — bullet list of what changed and why
+4. Behavioral changes — flagged explicitly if any
+5. Mode applied — Lite or Standard + convention target
