@@ -1,6 +1,6 @@
 ---
 name: rubysmithing-tui
-description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Huh, huh form, Gum, NTCharts, Bubbles, Bubblezone, Glamour, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
+description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Bubbles, bubbles (UI components), Huh, huh form, Gum, gum prompts, NTCharts, Bubblezone, Glamour, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, text input, spinner, list selection, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
 ---
 
 # Rubysmithing — TUI
@@ -13,7 +13,7 @@ Always produces a full skeleton. Generates against verified API syntax only.
 Before generating any scaffold or component code:
 
 1. **Activate rubysmithing-context** for each Bubble gem involved:
-   bubbletea, lipgloss, and any of: huh, gum, ntcharts, bubblezone, glamour, harmonica.
+   bubbletea, lipgloss, bubbles (UI components), and any of: huh, gum, ntcharts, bubblezone, glamour, harmonica.
    Generate no component code until API syntax is confirmed or WARNING block is injected.
 
 2. **Extract domain** from the request — what does this TUI control or display?
@@ -70,8 +70,9 @@ in every file. Define a thin `Components::Base` adapter in each scaffold:
 module AppName
   module Components
     # Internal adapter — isolates Bubble gem API surface.
-    # If bubbletea/lipgloss APIs change, update here only.
+    # If bubbletea/lipgloss/bubbles APIs change, update here only.
     module Base
+      # Layout helpers
       def self.panel(content, style: Styles::PANEL)
         style.render(content)
       end
@@ -82,6 +83,36 @@ module AppName
 
       def self.join_horizontal(*parts)
         Lipgloss.join_horizontal(Lipgloss::Align::TOP, *parts)
+      end
+
+      # Bubbles component wrappers
+      def self.text_input(**options)
+        input = Bubbles::TextInput.new
+        options.each { |key, value| input.public_send("#{key}=", value) }
+        input
+      end
+
+      def self.list(items, **options)
+        list = Bubbles::List.new(items)
+        options.each { |key, value| list.public_send("#{key}=", value) }
+        list
+      end
+
+      def self.spinner(style: Bubbles::Spinners::DOT)
+        Bubbles::Spinner.new(spinner: style)
+      end
+
+      # Gum utilities (for forms outside main TUI loop)
+      def self.prompt_input(**options)
+        Gum.input(**options)
+      end
+
+      def self.prompt_choose(items, **options)
+        Gum.choose(items, **options)
+      end
+
+      def self.prompt_filter(items, **options)
+        Gum.filter(items, **options)
       end
     end
   end
@@ -106,6 +137,12 @@ Load `references/tui-patterns.md` for:
 - Root App and Screen structural templates
 - Styles module conventions
 - Two-pane layout recipe
+- Bubbles::TextInput for interactive text entry
+- Bubbles::List for item selection and navigation
+- Bubbles::Spinner for loading states
+- Bubbles::Cursor for custom text cursors
+- Bubbles::Help for key binding documentation
+- Gum utility functions for external prompts
 - Huh form component
 - NTCharts metrics panel
 - Mouse zones (bubblezone)
@@ -117,10 +154,12 @@ Load `references/tui-patterns.md` for:
 
 | Domain | Screens | Key Components |
 | :---- | :---- | :---- |
-| File browser (GDrive etc.) | Browser, Editor, Export | FileList, PreviewPane, StatusBar, ActionMenu |
-| RAG configurator | Config, Ingest, Query, HIL | ParamForm, ChunkingOptions, ResultsViewer, HilReview |
-| Agent control panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput, Intervention |
-| Monitoring / metrics | Dashboard | MetricsChart, LogViewer, StatusGrid |
+| File browser (GDrive etc.) | Browser, Editor, Export | FileList (Bubbles::List), PreviewPane, StatusBar, ActionMenu |
+| RAG configurator | Config, Ingest, Query, HIL | ParamForm (Bubbles::TextInput), ChunkingOptions, ResultsViewer, HilReview |
+| Agent control panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput, Intervention (Gum prompts) |
+| Monitoring / metrics | Dashboard | MetricsChart, LogViewer, StatusGrid, LoadingSpinner (Bubbles::Spinner) |
+| Data entry forms | Input, Validation, Review | TextInput (Bubbles::TextInput), FormFields, ValidationPanel |
+| Search/Filter interfaces | Search, Results, Filter | SearchInput, FilteredList (Bubbles::List), ResultsPane |
 
 ## Output Format
 
