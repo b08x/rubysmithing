@@ -226,3 +226,89 @@ class LLMClient
   end
 end
 ```
+
+## Parallel Processing Patterns
+
+### CPU-bound work distribution
+
+```ruby
+require "parallel"
+
+# Process items across multiple processes
+results = Parallel.map(items, in_processes: 4) do |item|
+  # CPU-intensive work
+  item.heavy_computation
+end
+
+# With progress tracking
+results = Parallel.map_with_index(items, in_processes: 4) do |item, index|
+  LOGGER.info("Processing", index: index, total: items.size)
+  item.process
+end
+```
+
+### Concurrent primitives for shared state
+
+```ruby
+require "concurrent-ruby"
+
+# Thread-safe counter
+counter = Concurrent::AtomicFixnum.new(0)
+
+# Future-based async computation
+future = Concurrent::Future.execute { expensive_operation }
+result = future.value  # blocks until complete
+
+# Thread pool for I/O bound work (complement to Async fibers)
+pool = Concurrent::ThreadPoolExecutor.new(min_threads: 2, max_threads: 10)
+promise = Concurrent::Promise.execute(executor: pool) { api_call }
+```
+
+## Data Processing Patterns
+
+### JSON streaming for large files
+
+```ruby
+require "yajl-ruby"
+
+# Stream parse large JSON files
+parser = Yajl::Parser.new
+parser.on_parse_complete = ->(obj) { process_object(obj) }
+
+File.open("large_file.json") do |file|
+  parser << file.read(8192) while !file.eof?
+end
+```
+
+### Markdown processing
+
+```ruby
+require "commonmarker"
+require "kramdown"
+
+# Fast C-backed parser for deterministic output
+def parse_markdown_fast(text)
+  CommonMarker.render_html(text, :DEFAULT, [:table, :strikethrough])
+end
+
+# Pure Ruby parser when extensibility needed
+def parse_markdown_extensible(text)
+  Kramdown::Document.new(text).to_html
+end
+```
+
+### Content sanitization
+
+```ruby
+require "loofah"
+
+def sanitize_html(content)
+  # Remove scripts, normalize structure
+  Loofah.fragment(content).scrub!(:escape)
+end
+
+def extract_text(html)
+  # Strip all HTML tags, keep text content
+  Loofah.fragment(html).text
+end
+```
