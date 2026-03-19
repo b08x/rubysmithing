@@ -156,7 +156,7 @@ Last updated: 2026-03-18
 
 | Gem | Context7 ID | Role | Notes | last_verified |
 |---|---|---|---|---|
-| pry | `/pry/pry` | REPL / introspection | Runtime object spelunking | 2026-03 |
+| pry | `/websites/rdoc_info_github_pry_pry_master` | REPL / introspection | Runtime object spelunking | 2026-03 |
 
 ---
 

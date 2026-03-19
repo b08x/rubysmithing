@@ -159,33 +159,99 @@ module Rubysmithing
   end
 end
 
-# CLI usage: ruby context_cache.rb list | evict <gem> | check <gem> | stale <gem>
+# CLI usage: ruby context_cache.rb <command> [args] [--json]
+#
+#   fetch <gem> [--json]                          fresh fetch (respects TTL); exit 0=hit, 1=miss
+#   check <gem> [--json]                          alias for fetch (backward compat)
+#   stale <gem> [--json]                          fetch ignoring TTL; exit 0=fresh, 2=stale, 1=miss
+#   store <gem> <context7_id> [sigs_json] [ex]    upsert resolved entry; exit 0=ok, 1=error
+#   list [--json]                                 all cached entries
+#   evict <gem>                                   remove entry
+#
+# --json flag: machine-readable output for model invocation; human pp output when absent.
 if __FILE__ == $PROGRAM_NAME
   require "pp"
   cache = Rubysmithing::ContextCache.new
 
-  case ARGV[0]
+  json_mode = ARGV.include?("--json")
+  args      = ARGV.reject { |a| a == "--json" }
+
+  serialize_for_json = lambda do |entry|
+    entry.merge(resolved_at: entry[:resolved_at]&.strftime("%Y-%m-%d"))
+         .transform_keys(&:to_s)
+  end
+
+  case args[0]
   when "list"
-    pp cache.list
+    if json_mode
+      entries = cache.list.map { |e| e.transform_keys(&:to_s) }
+      puts JSON.generate(entries)
+    else
+      pp cache.list
+    end
   when "evict"
-    gem_name = ARGV[1] or abort "Usage: evict <gem_name>"
+    gem_name = args[1] or abort "Usage: evict <gem_name>"
     cache.evict(gem_name)
     puts "Evicted: #{gem_name}"
-  when "check"
-    gem_name = ARGV[1] or abort "Usage: check <gem_name>"
-    result = cache.fetch(gem_name)
-    result ? pp(result) : puts("Not cached or past TTL: #{gem_name}")
-  when "stale"
-    # Fetch even if stale — used to inspect fallback data quality
-    gem_name = ARGV[1] or abort "Usage: stale <gem_name>"
-    result = cache.fetch_stale(gem_name)
+  when "fetch", "check"
+    gem_name = args[1] or abort "Usage: #{args[0]} <gem_name>"
+    result   = cache.fetch(gem_name)
     if result
-      pp result
-      puts cache.staleness_warning(gem_name, entry: result) if result[:stale]
+      if json_mode
+        puts JSON.generate(serialize_for_json.call(result).merge("status" => "fresh"))
+      else
+        pp result
+      end
+      exit 0
     else
-      puts "Never cached: #{gem_name}"
+      if json_mode
+        puts JSON.generate({ "status" => "miss" })
+      else
+        puts "Not cached or past TTL: #{gem_name}"
+      end
+      exit 1
+    end
+  when "stale"
+    gem_name = args[1] or abort "Usage: stale <gem_name>"
+    result   = cache.fetch_stale(gem_name)
+    if result
+      is_stale = result[:stale]
+      if json_mode
+        payload = serialize_for_json.call(result).merge("status" => is_stale ? "stale" : "fresh")
+        payload["warning"] = cache.staleness_warning(gem_name, entry: result).chomp if is_stale
+        puts JSON.generate(payload)
+      else
+        pp result
+        puts cache.staleness_warning(gem_name, entry: result) if is_stale
+      end
+      exit(is_stale ? 2 : 0)
+    else
+      if json_mode
+        puts JSON.generate({ "status" => "miss" })
+      else
+        puts "Never cached: #{gem_name}"
+      end
+      exit 1
+    end
+  when "store"
+    gem_name    = args[1] or abort "Usage: store <gem_name> <context7_id> [sigs_json] [example]"
+    context7_id = args[2] or abort "Usage: store <gem_name> <context7_id> [sigs_json] [example]"
+    method_sigs = begin
+      JSON.parse(args[3] || "[]")
+    rescue JSON::ParserError => e
+      puts JSON.generate({ "status" => "error", "message" => "Invalid sigs_json: #{e.message}" })
+      exit 1
+    end
+    example = args[4]
+    cache.store(gem_name, context7_id: context7_id, method_sigs: method_sigs, example: example)
+    if json_mode
+      puts JSON.generate({ "status" => "stored", "gem_name" => gem_name })
+    else
+      puts "Stored: #{gem_name}"
     end
   else
-    puts "Usage: context_cache.rb [list|evict <gem>|check <gem>|stale <gem>]"
+    puts "Usage: context_cache.rb [fetch|check|stale <gem>|store <gem> <id> [sigs] [ex]|list|evict <gem>]"
+    puts "  --json  Output machine-readable JSON (fetch, check, stale, store, list)"
+    exit 1
   end
 end

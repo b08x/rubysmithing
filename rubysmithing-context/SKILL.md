@@ -43,15 +43,16 @@ If cached → use cached result directly, skip Steps 2–4.
 
 ## Step 2: Check Persistent SQLite Cache
 
-Before calling Context7, check `~/.rubysmithing/context_cache.db` via
-`scripts/context_cache.rb`.
+Before calling Context7, check `~/.rubysmithing/context_cache.db`:
 
-```
-cache = Rubysmithing::ContextCache.new
-entry = cache.fetch(gem_name)   # returns nil if missing or past TTL (7 days)
+```bash
+result=$(ruby rubysmithing-context/scripts/context_cache.rb fetch GEMNAME --json)
+# {"status":"fresh",...} → use cached entry, add to session cache, skip Steps 3–4
+# {"status":"miss"}      → proceed to Step 3
 ```
 
-If a fresh entry is found → use it, add to session cache, skip Steps 3–4.
+If `status` is `"fresh"` → use `context7_id`, `method_sigs`, and `example` fields directly,
+add to session cache, skip Steps 3–4.
 
 ## Step 3: Resolve Library ID
 
@@ -84,9 +85,14 @@ deprecation warnings or breaking changes noted in docs.
 
 Store the resolved result in both session cache and SQLite persistent cache:
 
+```bash
+ruby rubysmithing-context/scripts/context_cache.rb store GEMNAME CONTEXT7_ID \
+  '[".method_one(arg:)", ".method_two"]' \
+  'GemClass.new.call'
 ```
-cache.store(gem_name, context7_id: id, method_sigs: [...], example: "...")
-```
+
+Also add to session cache mentally. If exit 1, log and continue — session cache still holds
+the result for this session.
 
 Return to the requesting skill:
 
@@ -104,29 +110,24 @@ apply the following tiered degradation — do not block code generation.
 
 ### Tier 1 — Stale SQLite Cache (preferred fallback)
 
-```ruby
-entry = cache.fetch_stale(gem_name)
+```bash
+result=$(ruby rubysmithing-context/scripts/context_cache.rb stale GEMNAME --json)
+# Exit 0 = fresh  → use result normally
+# Exit 2 = stale  → use result, inject result["warning"] block above generated code,
+#                   flag every method call with # stale-cache
+# Exit 1 = miss   → proceed to Tier 2
 ```
 
-If a stale entry exists (any age), use it and inject a staleness warning block:
-
-```ruby
-# [WARNING: Stale API Syntax — Context7 Unavailable]
-# Could not reach Context7 to refresh documentation for: [gem_name]
-# Falling back to cached data last verified: [date] ([N] days ago)
-# This code MAY be outdated. Verify against: https://rubygems.org/gems/[gem_name]
-# Re-run after Context7 is reachable to refresh: cache.evict("[gem_name]")
-```
-
-Flag every method call from the stale gem with `# stale-cache` inline comment.
-Add to session cache with `stale: true` flag so downstream skills know.
+The `"warning"` field in the JSON is pre-formatted by `staleness_warning` — inject it verbatim
+above the generated code block. Flag every method call from the stale gem with `# stale-cache`.
+Add to session cache with `stale: true` so downstream skills know.
 
 ### Tier 2 — Gem Registry ID + Retry
 
 If no SQLite entry at all, check `references/gem-registry.md` for a pre-mapped
 Context7 ID and attempt a single retry with that ID directly, bypassing resolve step.
 
-If retry succeeds → cache result, proceed normally.
+If retry succeeds → store the result via Bash store command (see Step 5) and proceed normally.
 If retry fails → continue to Tier 3.
 
 ### Tier 3 — Unverified Training Data (last resort)
@@ -200,9 +201,49 @@ If the cache file doesn't exist, create it on first use — do not error.
 
 ### Cache CLI
 
+Human-readable (`pp`) output by default; add `--json` for machine-readable output.
+
 ```bash
-ruby scripts/context_cache.rb list              # all cached gems with age + status
-ruby scripts/context_cache.rb check <gem>       # fresh fetch (respects TTL)
-ruby scripts/context_cache.rb stale <gem>       # stale fetch + warning block
-ruby scripts/context_cache.rb evict <gem>       # remove entry to force refresh
+# Fresh fetch — respects TTL (7 days); returns miss if absent or expired
+ruby scripts/context_cache.rb fetch <gem> [--json]
+
+# Alias for fetch (backward compat)
+ruby scripts/context_cache.rb check <gem> [--json]
+
+# Stale fetch — ignores TTL; returns any entry regardless of age
+ruby scripts/context_cache.rb stale <gem> [--json]
+
+# Upsert resolved entry; sigs_json is a JSON array string, example is a single-quoted string
+ruby scripts/context_cache.rb store <gem> <context7_id> [sigs_json] [example]
+
+# List all cached gems with age and staleness status
+ruby scripts/context_cache.rb list [--json]
+
+# Remove entry to force fresh lookup on next use
+ruby scripts/context_cache.rb evict <gem>
 ```
+
+**Exit codes:**
+
+| Command       | Exit 0          | Exit 1       | Exit 2              |
+|---------------|-----------------|--------------|---------------------|
+| fetch / check | entry found     | miss / error | —                   |
+| stale         | found + fresh   | miss         | found but stale     |
+| store         | stored ok       | parse error  | —                   |
+| list / evict  | always 0        | —            | —                   |
+
+**`--json` output shapes (fetch/check hit):**
+
+```json
+{"status":"fresh","gem_name":"ruby_llm","context7_id":"/crmne/ruby_llm",
+ "method_sigs":[".chat(...)"],"example":"...","resolved_at":"2026-03-11",
+ "age_days":7.0,"ttl_days":7}
+```
+
+Miss: `{"status":"miss"}`
+
+**stale hit (exit 2):** same shape + `"status":"stale"` + `"warning":"<pre-formatted block>"`
+
+**store:** `{"status":"stored","gem_name":"ruby_llm"}` (or `Stored: ruby_llm` without `--json`)
+
+**list `--json`:** JSON array of entry objects with string keys.
