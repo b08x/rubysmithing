@@ -4,88 +4,92 @@ Cross-reference of the project gem stack with Context7 library IDs, architectura
 planes, and common usage patterns. Used by rubysmithing-context to resolve library  
 IDs without a resolve step, and by rubysmithing-genai/tui for stack-aware scaffolding.
 
-Last updated: 2026-03
+Last updated: 2026-03-18
+
+> **Registry staleness**: each entry carries a `last_verified` date (YYYY-MM).
+> Entries older than 3 months should be re-verified via Context7 before use.
+> Run `cache.evict("<gem>")` after a successful re-verification to force a fresh lookup.
 
 ---
 
 ## Runtime Spine (Boot + Wiring)
 
-| Gem | Context7 ID | Role | Notes |
-|---|---|---|---|
-| dotenv | `/bkeepers/dotenv` | Env var loader | No Context7 entry; API is stable (`Dotenv.load`) |
-| tty-config | `/piotrmurach/tty-config` | Config loader | No Context7 entry; check rubydoc.info |
-| zeitwerk | `/fxn/zeitwerk` | Code autoloader | No Context7 entry; API is stable |
-| rake | `/ruby/rake` | Task automation | No Context7 entry |
-| journald-logger | `/theforeman/journald-logger` | Structured logging | No Context7 entry |
-| hashie | `/hashie/hashie` | Flexible data structures | Mash, indifferent access; abstraction leak vector |
+| Gem | Context7 ID | Role | Notes | last_verified |
+|---|---|---|---|---|
+| dotenv | `/bkeepers/dotenv` | Env var loader | No Context7 entry; API is stable (`Dotenv.load`) | 2026-03 |
+| tty-config | `/piotrmurach/tty-config` | Config loader | No Context7 entry; check rubydoc.info | 2026-03 |
+| zeitwerk | `/fxn/zeitwerk` | Code autoloader | No Context7 entry; API is stable | 2026-03 |
+| rake | `/ruby/rake` | Task automation | No Context7 entry | 2026-03 |
+| journald-logger | `/theforeman/journald-logger` | Structured logging | No Context7 entry | 2026-03 |
+| hashie | `/hashie/hashie` | Flexible data structures | Mash, indifferent access; abstraction leak vector | 2026-03 |
 
 ---
 
 ## CLI & Terminal UI Layer
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| bubbletea | `/marcoroth/bubbletea-ruby` | TUI framework (Elm arch) | Model / Update / View lifecycle; 48 snippets |
-| lipgloss | `/marcoroth/lipgloss-ruby` | Terminal styling | Style composition, join_horizontal/vertical; 72 snippets |
-| bubblezone | `/marcoroth/bubblezone-ruby` | Mouse events | Zone registration, click detection; 53 snippets |
-| gum | `/marcoroth/gum-ruby` | Shell UI utilities | choose, input, confirm wrappers; 72 snippets |
-| bubbles | `/marcoroth/bubbles-ruby` | TUI components | List, TextArea, Spinner, Progress |
-| glamour | `/marcoroth/glamour-ruby` | Markdown rendering | Render markdown strings in terminal |
-| harmonica | `/marcoroth/harmonica-ruby` | Animation/transitions | Spring physics for UI transitions |
-| huh | `/marcoroth/huh-ruby` | Form builder | Form groups, Select, Input, Confirm |
-| ntcharts | `/marcoroth/ntcharts-ruby` | Terminal charts | Line, Bar, Scatter charts |
-| highline | `/JEG2/highline` | CLI fallback | No Context7 entry; legacy/fallback only |
-| drydock | `/delano/drydock` | CLI framework | No Context7 entry |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| bubbletea | `/marcoroth/bubbletea-ruby` | TUI framework (Elm arch) | Model / Update / View lifecycle; 48 snippets | 2026-03 |
+| lipgloss | `/marcoroth/lipgloss-ruby` | Terminal styling | Style composition, join_horizontal/vertical; 72 snippets | 2026-03 |
+| bubblezone | `/marcoroth/bubblezone-ruby` | Mouse events | Zone registration, click detection; 53 snippets | 2026-03 |
+| gum | `/marcoroth/gum-ruby` | Shell UI utilities | choose, input, confirm wrappers; 72 snippets | 2026-03 |
+| bubbles | `/marcoroth/bubbles-ruby` | TUI components | List, TextArea, Spinner, Progress | 2026-03 |
+| glamour | `/marcoroth/glamour-ruby` | Markdown rendering | Render markdown strings in terminal | 2026-03 |
+| harmonica | `/marcoroth/harmonica-ruby` | Animation/transitions | Spring physics for UI transitions | 2026-03 |
+| huh | `/marcoroth/huh-ruby` | Form builder | Form groups, Select, Input, Confirm | 2026-03 |
+| ntcharts | `/marcoroth/ntcharts-ruby` | Terminal charts | Line, Bar, Scatter charts | 2026-03 |
+| highline | `/JEG2/highline` | CLI fallback | No Context7 entry; legacy/fallback only | 2026-03 |
+| drydock | `/delano/drydock` | CLI framework | No Context7 entry | 2026-03 |
 
 ---
 
 ## Storage & Persistence
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| sequel | `/jeremyevans/sequel` | Database toolkit / ORM | Dataset API, migrations, plugins |
-| sequel_pg | `/jeremyevans/sequel_pg` | Postgres performance extension | Faster encoding/decoding, driver bypass paths |
-| pgvector | `/pgvector/pgvector` | Vector similarity search | `vector` column type, `<=>` operator, `nearest_neighbors` |
-| pg | — | PostgreSQL driver | No Context7 entry; used via sequel |
-| redis | — | Redis client | No Context7 entry; API is stable |
-| redic | — | Lightweight Redis client | No Context7 entry |
-| ohm | `/soveran/ohm` | Redis object modeling | No Context7 entry |
-| ohm-contrib | `/cyx/ohm-contrib` | Ohm extensions | No Context7 entry |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| sequel | `/jeremyevans/sequel` | Database toolkit / ORM | Dataset API, migrations, plugins | 2026-03 |
+| sequel_pg | `/jeremyevans/sequel_pg` | Postgres performance extension | Faster encoding/decoding, driver bypass paths | 2026-03 |
+| pgvector | `/pgvector/pgvector` | Vector similarity search | `vector` column type, `<=>` operator, `nearest_neighbors` | 2026-03 |
+| pg | — | PostgreSQL driver | No Context7 entry; used via sequel | 2026-03 |
+| redis | — | Redis client | No Context7 entry; API is stable | 2026-03 |
+| redic | — | Lightweight Redis client | No Context7 entry | 2026-03 |
+| ohm | `/soveran/ohm` | Redis object modeling | No Context7 entry | 2026-03 |
+| ohm-contrib | `/cyx/ohm-contrib` | Ohm extensions | No Context7 entry | 2026-03 |
 
 ---
 
 ## Async, Networking & Orchestration
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| async | `/socketry/async` | Fiber concurrency | `Async { }` blocks, `Async::Task`, barriers |
-| falcon | `/socketry/falcon` | Async HTTP server | Rack-compatible, fiber scheduler |
-| gush | `/chaps-io/gush` | DAG workflow engine | Job definition, workflow creation, Redis backend |
-| faraday | — | HTTP client | No Context7 entry; API is stable |
-| circuit_breaker | `/wsargent/circuit_breaker` | Circuit breaker | State machine-based, thread-safe |
-| parallel | `/grosser/parallel` | Multi-process parallelism | `Parallel.map`, CPU-bound distribution |
-| concurrent-ruby | `/ruby-concurrency/concurrent-ruby` | Concurrency primitives | Futures, promises, thread pools |
-| open4 | `/ahoward/open4` | Process control | Spawn + capture stdout/stderr; shell boundary |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| async | `/socketry/async` | Fiber concurrency | `Async { }` blocks, `Async::Task`, barriers | 2026-03 |
+| falcon | `/socketry/falcon` | Async HTTP server | Rack-compatible, fiber scheduler | 2026-03 |
+| gush | `/chaps-io/gush` | DAG workflow engine | Job definition, workflow creation, Redis backend | 2026-03 |
+| faraday | — | HTTP client | No Context7 entry; API is stable | 2026-03 |
+| circuit_breaker | `/wsargent/circuit_breaker` | Circuit breaker | State machine-based, thread-safe | 2026-03 |
+| parallel | `/grosser/parallel` | Multi-process parallelism | `Parallel.map`, CPU-bound distribution | 2026-03 |
+| concurrent-ruby | `/ruby-concurrency/concurrent-ruby` | Concurrency primitives | Futures, promises, thread pools | 2026-03 |
+| open4 | `/ahoward/open4` | Process control | Spawn + capture stdout/stderr; shell boundary | 2026-03 |
 
 ---
 
 ## AI / NLP Layer
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| ruby_llm | `/crmne/ruby_llm` | Unified LLM interface | `.chat`, `.embed`, tool definitions, streaming |
-| ruby_llm-mcp | `/patvice/ruby_llm-mcp` | MCP integration | No Context7 entry |
-| ruby_llm-schema | `/danielfriis/ruby_llm-schema` | Structured outputs | Schema validation on LLM responses |
-| dspy.rb | `/vicentereig/dspy.rb` | LLM programming framework | Signatures, Predict, ChainOfThought, ReAct |
-| dspy-ruby_llm | — | DSPy ↔ RubyLLM adapter | use the dspy.rb context7 ID |
-| informers | `/ankane/informers` | Local transformer inference | Embedding and classification models |
-| ruby-spacy | `/yohasebe/ruby-spacy` | spaCy NLP via Ruby | Pipeline loading, entity extraction, parsing |
-| deepsearch-rb | `/alexshagov/deepsearch-rb` | Web research | No Context7 entry |
-| tomoto | `/ankane/tomoto` | Topic modeling | No Context7 entry |
-| hugging-face | `/fwdai/hugging-face` | HF API client | Remote inference, model routing |
-| lingua | `/dbalatero/lingua` | Language detection | N-gram based classification |
-| ruby-wordnet | `/ged/ruby-wordnet` | Lexical semantics | Synsets, hypernyms, semantic graph |
-| wordnet-defaultdb | `/wordnet/wordnet-defaultdb` | WordNet dataset | Required backing DB |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| ruby_llm | `/crmne/ruby_llm` | Unified LLM interface | `.chat`, `.embed`, tool definitions, streaming | 2026-03 |
+| ruby_llm-mcp | `/patvice/ruby_llm-mcp` | MCP integration | No Context7 entry | 2026-03 |
+| ruby_llm-schema | `/danielfriis/ruby_llm-schema` | Structured outputs | Schema validation on LLM responses | 2026-03 |
+| dspy.rb | `/vicentereig/dspy.rb` | LLM programming framework | Signatures, Predict, ChainOfThought, ReAct | 2026-03 |
+| dspy-ruby_llm | — | DSPy ↔ RubyLLM adapter | use the dspy.rb context7 ID | 2026-03 |
+| informers | `/ankane/informers` | Local transformer inference | Embedding and classification models | 2026-03 |
+| ruby-spacy | `/yohasebe/ruby-spacy` | spaCy NLP via Ruby | Pipeline loading, entity extraction, parsing | 2026-03 |
+| deepsearch-rb | `/alexshagov/deepsearch-rb` | Web research | No Context7 entry | 2026-03 |
+| tomoto | `/ankane/tomoto` | Topic modeling | No Context7 entry | 2026-03 |
+| hugging-face | `/fwdai/hugging-face` | HF API client | Remote inference, model routing | 2026-03 |
+| lingua | `/dbalatero/lingua` | Language detection | N-gram based classification | 2026-03 |
+| ruby-wordnet | `/ged/ruby-wordnet` | Lexical semantics | Synsets, hypernyms, semantic graph | 2026-03 |
+| wordnet-defaultdb | `/wordnet/wordnet-defaultdb` | WordNet dataset | Required backing DB | 2026-03 |
 
 **Additional Context7 docs for AI layer:**
 
@@ -98,69 +102,69 @@ Last updated: 2026-03
 
 ## Data Processing
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| pragmatic_segmenter | `/diasks2/pragmatic_segmenter` | Sentence segmentation | Rule-based boundary detection |
-| front_matter_parser | `/waiting-for-dev/front_matter_parser` | YAML frontmatter extraction | No Context7 entry |
-| jsonl | — | JSON Lines parser | No Context7 entry |
-| yajl-ruby | `/brianmario/yajl-ruby` | Streaming JSON parser | Incremental parsing |
-| commonmarker | `/gjtorikian/commonmarker` | Markdown → AST | C-backed parser, deterministic output |
-| kramdown | `/gettalong/kramdown` | Markdown parser | Pure Ruby, extensible |
-| loofah | `/flavorjones/loofah` | HTML sanitization | XSS boundary enforcement |
-| mimemagic | `/mimemagicrb/mimemagic` | MIME detection | Content-type inference |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| pragmatic_segmenter | `/diasks2/pragmatic_segmenter` | Sentence segmentation | Rule-based boundary detection | 2026-03 |
+| front_matter_parser | `/waiting-for-dev/front_matter_parser` | YAML frontmatter extraction | No Context7 entry | 2026-03 |
+| jsonl | — | JSON Lines parser | No Context7 entry | 2026-03 |
+| yajl-ruby | `/brianmario/yajl-ruby` | Streaming JSON parser | Incremental parsing | 2026-03 |
+| commonmarker | `/gjtorikian/commonmarker` | Markdown → AST | C-backed parser, deterministic output | 2026-03 |
+| kramdown | `/gettalong/kramdown` | Markdown parser | Pure Ruby, extensible | 2026-03 |
+| loofah | `/flavorjones/loofah` | HTML sanitization | XSS boundary enforcement | 2026-03 |
+| mimemagic | `/mimemagicrb/mimemagic` | MIME detection | Content-type inference | 2026-03 |
 
 ---
 
 ## Retrieval, Similarity & Fuzzy Matching
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| tf-idf-similarity | `/jpmckinney/tf-idf-similarity` | Vector space model | TF-IDF matrix + cosine similarity |
-| bm25f-ruby | `/catflip/bm25f-ruby` | Ranking function | BM25F scoring across fields |
-| fuzzy_tools | `/brianhempel/fuzzy_tools` | Approximate matching | Edit distance, token similarity |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| tf-idf-similarity | `/jpmckinney/tf-idf-similarity` | Vector space model | TF-IDF matrix + cosine similarity | 2026-03 |
+| bm25f-ruby | `/catflip/bm25f-ruby` | Ranking function | BM25F scoring across fields | 2026-03 |
+| fuzzy_tools | `/brianhempel/fuzzy_tools` | Approximate matching | Edit distance, token similarity | 2026-03 |
 
 ---
 
 ## Algorithms / Knowledge Structures
 
-| Gem | Context7 ID | Role | Notes |
-|---|---|---|---|
-| algorithms | `/kanwei/algorithms` | Data structures | No Context7 entry |
-| rubyfca | `/yohasebe/rubyfca` | Formal Concept Analysis | Lattice construction |
-| gemoji | `/github/gemoji` | Emoji lookup | No Context7 entry; CLI rendering only |
+| Gem | Context7 ID | Role | Notes | last_verified |
+|---|---|---|---|---|
+| algorithms | `/kanwei/algorithms` | Data structures | No Context7 entry | 2026-03 |
+| rubyfca | `/yohasebe/rubyfca` | Formal Concept Analysis | Lattice construction | 2026-03 |
+| gemoji | `/github/gemoji` | Emoji lookup | No Context7 entry; CLI rendering only | 2026-03 |
 
 ---
 
 ## Validation & Types
 
-| Gem | Context7 ID | Role | Key Patterns |
-|---|---|---|---|
-| dry-schema | `/dry-rb/dry-schema` | Schema validation | `Dry::Schema.Params`, `.call`, `.errors` |
-| dry-types | `/dry-rb/dry-types` | Type system | `Types::Strict::*`, coercion |
+| Gem | Context7 ID | Role | Key Patterns | last_verified |
+|---|---|---|---|---|
+| dry-schema | `/dry-rb/dry-schema` | Schema validation | `Dry::Schema.Params`, `.call`, `.errors` | 2026-03 |
+| dry-types | `/dry-rb/dry-types` | Type system | `Types::Strict::*`, coercion | 2026-03 |
 
 ---
 
 ## Parsing / Encoding Boundaries
 
-| Gem | Context7 ID | Role | Notes |
-|---|---|---|---|
-| decode | `/socketry/decode` | Structured decoding | Binary/text decoding primitives |
+| Gem | Context7 ID | Role | Notes | last_verified |
+|---|---|---|---|---|
+| decode | `/socketry/decode` | Structured decoding | Binary/text decoding primitives | 2026-03 |
 
 ---
 
 ## Debugging & Introspection
 
-| Gem | Context7 ID | Role | Notes |
-|---|---|---|---|
-| pry | `/pry/pry` | REPL / introspection | Runtime object spelunking |
+| Gem | Context7 ID | Role | Notes | last_verified |
+|---|---|---|---|---|
+| pry | `/pry/pry` | REPL / introspection | Runtime object spelunking | 2026-03 |
 
 ---
 
 ## MCP Tooling
 
-| Gem | Context7 ID | Role | Notes |
-|---|---|---|---|
-| fast-mcp | `/yjacquin/fast-mcp` | Fast MCP server | Tool registration, server boot |
+| Gem | Context7 ID | Role | Notes | last_verified |
+|---|---|---|---|---|
+| fast-mcp | `/yjacquin/fast-mcp` | Fast MCP server | Tool registration, server boot | 2026-03 |
 
 ---
 

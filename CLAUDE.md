@@ -11,11 +11,12 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 ### Hub-and-Spoke Skill System
 
 - **rubysmithing** (Hub): Central router for Ruby code generation, POROs, Rake tasks, and config wiring
-- **rubysmithing-context**: Gem API verification using Context7 MCP server
+- **rubysmithing-context**: Gem API verification using Context7 MCP server; prerequisite for all code-generating skills
 - **rubysmithing-genai**: AI/NLP components (chatbots, RAG pipelines, DSPy modules, MCP servers)
 - **rubysmithing-tui**: Terminal UI scaffolding with Charm/Bubble ecosystem
 - **rubysmithing-refactor**: Convention-targeted code fixes and anti-pattern removal
 - **rubysmithing-report**: QA assessment using SIFT Protocol V1.0
+- **rubysmithing-yardoc**: YARD documentation generation with semantic AST analysis and type inference
 
 ### Skill Workflow
 
@@ -26,12 +27,13 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 
 ## Execution Modes
 
-### Lite Mode (≤50 lines or simple scripts)
+### Lite Mode (single-file output ≤50 lines, or explicitly simple tasks)
 
 - Pure Ruby stdlib only
 - No `dry-schema`, `async`, `circuit_breaker`
 - No architectural mandates
 - Triggered by: "quick script", "simple utility", "one-off", "stdlib only"
+- **Multi-file scaffold requests always trigger Standard Mode** regardless of per-file line count
 
 ### Standard Mode (default)
 
@@ -52,6 +54,9 @@ Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby devel
 | **Logging** | journald-logger |
 
 ## Convention Detection Priority
+
+Canonical definition lives in `rubysmithing/references/convention-detection.md`.
+All skills reference that file rather than repeating the cascade. Summary:
 
 1. `.rubocop.yml` present → use RuboCop config
 2. `standard` in Gemfile → use StandardRB

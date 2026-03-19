@@ -1,6 +1,7 @@
 ---
 name: rubysmithing-yardoc
-description: YARD documentation generator with semantic analysis for Ruby files. Automatically activates on requests to generate, add, or improve YARD documentation. Uses AST parsing and type inference to generate comprehensive @param, @return, @example, and @raise tags. Maintains consistency with existing project documentation patterns and YARD configuration. Generates production-grade documentation that eliminates usage pitfalls and accelerates correct method implementation.
+requires: [rubysmithing-context]
+description: YARD documentation generator with semantic analysis for Ruby files. Automatically activates on requests to generate, add, or improve YARD documentation. Uses AST parsing and type inference to generate comprehensive @param, @return, @example, and @raise tags. Maintains consistency with existing project documentation patterns and YARD configuration. Generates production-grade documentation that eliminates usage pitfalls and accelerates correct method implementation. Requires rubysmithing-context when the target file uses non-stdlib gems, to ensure type annotations reflect verified API shapes.
 ---
 
 # Rubysmithing — YARD Documentation Generator
@@ -17,6 +18,23 @@ Activate on any mention of:
 - "improve documentation", "better docs", "missing documentation"
 
 Skip activation for: README generation, project overview docs, non-Ruby files.
+
+## Step 0: Gem Context Check (Prerequisite)
+
+Before generating type annotations, check whether the target file uses non-stdlib gems.
+
+If gem-specific types appear in method signatures or return values (e.g., `RubyLLM::Chat`,
+`Sequel::Dataset`, `Async::Task`, `Dry::Schema::Result`):
+
+1. **Activate rubysmithing-context** for each gem involved.
+   Type annotations derived from unverified API shapes produce misleading documentation.
+2. Use verified method signatures verbatim in `@param` and `@return` tags.
+3. If Context7 is unavailable, apply the tiered fallback from `rubysmithing-context`
+   and note `# type annotation based on stale cache — verify before publishing` inline.
+
+Skip this step for: stdlib-only files, Lite Mode tasks, gems already resolved this session.
+
+---
 
 ## Step 1: Validate Target and Context
 

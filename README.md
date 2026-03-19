@@ -9,27 +9,41 @@ A modular, convention-aware skill suite for Ruby development with AI assistance.
 ├── rubysmithing/              # Hub skill: routes tasks, handles simple Ruby gen
 │   ├── SKILL.md
 │   └── references/
-│       └── conventions.md     # Core Ruby/Stack idioms
+│       ├── conventions.md          # Core Ruby/Stack idioms
+│       └── convention-detection.md # Canonical convention cascade (single source of truth)
 ├── rubysmithing-context/      # Gem API verification (Context7)
 │   ├── SKILL.md
 │   ├── scripts/
-│   │   └── context_cache.rb   # Persistent gem resolution
+│   │   └── context_cache.rb   # Persistent gem resolution + stale-cache fallback
 │   └── references/
-│       └── gem-registry.md
+│       └── gem-registry.md    # Context7 IDs + last_verified dates
 ├── rubysmithing-genai/        # AI/NLP scaffolding & patterns
 ├── rubysmithing-refactor/     # Targeted convention fixes
 ├── rubysmithing-report/       # SIFT Protocol V1.0 QA assessments
 ├── rubysmithing-tui/          # Terminal UI building with adapter pattern
+│   └── assets/skeleton/       # Standardized TUI project structure
 └── rubysmithing-yardoc/       # YARD documentation generation with semantic analysis
-    └── assets/skeleton/       # Standardized TUI project structure
 ```
 
 ## Core Execution Modes
 
-All skills in the suite now support two primary execution modes:
+All skills in the suite support two primary execution modes:
 
-- **Lite Mode:** For scripts ≤ ~50 lines, quick utilities, or pure `stdlib` tasks. Omits architectural mandates (async, circuit_breaker, dry-schema) for proportional effort.
+- **Lite Mode:** For single-file output ≤ ~50 lines, quick utilities, or pure `stdlib` tasks. Omits architectural mandates (async, circuit_breaker, dry-schema) for proportional effort. **Multi-file scaffold requests always use Standard Mode** regardless of per-file line count.
 - **Standard Mode:** The default for project-level code. Enforces full stack conventions: `async` fibers, `circuit_breaker`, `journald-logger`, `dry-schema` validation, and Zeitwerk compliance.
+
+## Skill Dependency Declarations
+
+Each `SKILL.md` frontmatter now includes a `requires:` field listing prerequisite skills that must run before code generation:
+
+```yaml
+---
+name: rubysmithing-yardoc
+requires: [rubysmithing-context]
+---
+```
+
+Skills with `requires: []` have no prerequisites. This gives the executing agent a machine-readable dependency graph rather than relying on prose-only instructions.
 
 ## Skills Overview
 
@@ -42,10 +56,18 @@ The central entry point. Routes complex requests to sub-skills and handles direc
 
 ### rubysmithing-context
 
-Resolves live gem documentation using Context7.
+Resolves live gem documentation using Context7. Fails loudly — never silently. Degrades gracefully when Context7 is unreachable.
 
-- **What's new:** Added `context_cache.rb` to persist gem resolution data, preventing redundant API calls.
+- **What's new:** Tiered degradation protocol for Context7 unavailability and rate limits: (1) serve stale SQLite cache with warning, (2) retry using pre-mapped gem-registry ID, (3) inject `[WARNING: Unverified API Syntax]` as last resort. Cache schema fixed to include `ttl_days` column; `fetch_stale` enables Tier 1 fallback without blocking generation. `gem-registry.md` now tracks `last_verified` dates per entry.
 - **Use cases:** "How do I use `ruby_llm` with tool calling?", "What is the latest `bubbletea` update syntax?".
+
+**Cache CLI:**
+```bash
+ruby scripts/context_cache.rb list              # all cached gems + staleness status
+ruby scripts/context_cache.rb check <gem>       # fresh fetch (respects TTL)
+ruby scripts/context_cache.rb stale <gem>       # stale fetch + warning block
+ruby scripts/context_cache.rb evict <gem>       # force re-resolution next use
+```
 
 ### rubysmithing-report
 
@@ -78,17 +100,19 @@ Rewrites code to follow conventions.
 
 YARD documentation generator with semantic analysis and type inference.
 
-- **What's new:** Advanced AST parsing and behavioral pattern recognition to generate comprehensive @param, @return, @example, and @raise tags automatically.
+- **What's new:** Now registered in the hub's companion skills table. Added `requires: [rubysmithing-context]` — when the target file uses non-stdlib gems, yardoc activates `rubysmithing-context` first to ensure type annotations reflect verified API shapes rather than training-data guesses. Step 0 prerequisite check added to `SKILL.md`.
 - **Use cases:** "Generate YARD docs for this file", "Add comprehensive documentation", "Document this Ruby class with examples".
 
 ## Skill Routing & Workflow
 
 The hub automatically determines the best path:
 
-1. **rubysmithing-context** verifies gem APIs.
-2. **rubysmithing** (Hub) chooses **Lite** or **Standard** mode.
-3. Sub-skills generate or refactor components.
+1. **rubysmithing-context** verifies gem APIs (checks session cache → SQLite cache → Context7 → tiered fallback).
+2. **rubysmithing** (Hub) chooses **Lite** or **Standard** mode. Multi-file tasks always use Standard Mode.
+3. Sub-skills generate or refactor components using verified API syntax.
 4. **rubysmithing-report** provides the final QA validation.
+
+Convention detection follows the canonical cascade in `rubysmithing/references/convention-detection.md` — all skills reference this single file rather than each defining the cascade independently.
 
 ## Project Stack Reference
 

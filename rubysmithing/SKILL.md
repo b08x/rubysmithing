@@ -1,6 +1,7 @@
 ---
 name: rubysmithing
-description: Convention-aware Ruby code generator for the terminal-native AI orchestration stack (dotenv, tty-config, zeitwerk, async, dry-schema, sequel, journald-logger, circuit_breaker, parallel, concurrent-ruby). Use for generating Ruby classes, modules, Rake tasks, config wiring, boot layer code, data pipelines, POROs, error class hierarchies, parallel processing workers, content parsers, and Gemfile decisions. Applies project-detected conventions (RuboCop, StandardRB, or community idioms) automatically. For scripts under ~50 lines or pure stdlib work, activates Lite Mode — no dry-schema, no async, no circuit breakers. Does NOT handle: LLM/AI/NLP code (rubysmithing-genai), TUI interfaces (rubysmithing-tui), refactoring (rubysmithing-refactor), or quality reports (rubysmithing-report). Always defers to rubysmithing-context for gem API verification before generating library-specific code.
+requires: []
+description: Convention-aware Ruby code generator for the terminal-native AI orchestration stack (dotenv, tty-config, zeitwerk, async, dry-schema, sequel, journald-logger, circuit_breaker, parallel, concurrent-ruby). Use for generating Ruby classes, modules, Rake tasks, config wiring, boot layer code, data pipelines, POROs, error class hierarchies, parallel processing workers, content parsers, and Gemfile decisions. Applies project-detected conventions (RuboCop, StandardRB, or community idioms) automatically. For single-file output under ~50 lines or pure stdlib work, activates Lite Mode — no dry-schema, no async, no circuit breakers. Multi-file scaffold requests always use Standard Mode regardless of per-file line count. Does NOT handle: LLM/AI/NLP code (rubysmithing-genai), TUI interfaces (rubysmithing-tui), refactoring (rubysmithing-refactor), quality reports (rubysmithing-report), or YARD documentation (rubysmithing-yardoc). Always defers to rubysmithing-context for gem API verification before generating library-specific code.
 ---
 
 # Rubysmithing
@@ -19,13 +20,17 @@ Each operates independently. Load them when the task clearly falls in their doma
 | `rubysmithing-tui` | BubbleTea apps, Lipgloss layouts, Huh forms, TUI components |
 | `rubysmithing-refactor` | Convention fixes, anti-pattern removal, Zeitwerk compliance |
 | `rubysmithing-report` | SIFT QA audit, design review, tech advisory |
+| `rubysmithing-yardoc` | YARD documentation generation with semantic type inference |
 
 ## Step 1: Detect Mode
 
-### Lite Mode (scripts ≤ ~50 lines or explicitly simple tasks)
+### Lite Mode (single-file output ≤ ~50 lines, or explicitly simple tasks)
 
 Triggers: "quick script", "simple utility", "one-off", "no dependencies", "stdlib only",
 or a clearly small self-contained task.
+
+**Multi-file scaffold requests always trigger Standard Mode** regardless of individual
+file line count. If the task would produce more than one file, apply Standard Mode.
 
 In Lite Mode:
 
@@ -41,12 +46,15 @@ Apply full conventions from `references/conventions.md`.
 
 ## Step 2: Detect Convention Target
 
-Scan for project signals in priority order:
+See `references/convention-detection.md` for the canonical detection cascade and
+reporting format. Summary:
 
 1. `.rubocop.yml` present → use RuboCop config
 2. `standard` in Gemfile → use StandardRB
 3. `.rubysmith` / `rubysmith` gem → use Rubysmith defaults
 4. None → apply community idioms from `references/conventions.md`
+
+Always state which target was detected and from which artifact before generating.
 
 ## Step 3: Gem Context Check
 
