@@ -5,5 +5,29 @@
   "author": {
     "name": "b08x"
   },
-  "keywords": ["ruby", "code-generation", "tui", "genai", "refactoring", "yardoc", "zeitwerk", "rubysmithing"]
+  "keywords": [
+    "ruby",
+    "code-generation",
+    "tui",
+    "genai",
+    "refactoring",
+    "yardoc",
+    "zeitwerk",
+    "rubysmithing"
+  ],
+  "skills": [
+    "./skills/",
+    "./commands/"
+  ],
+  "agents": [
+    "./agents/rubysmithing-context.md",
+    "./agents/rubysmithing-genai.md",
+    "./agents/rubysmithing-main.md",
+    "./agents/rubysmithing-orchestrator.md",
+    "./agents/rubysmithing-refactor.md",
+    "./agents/rubysmithing-report.md",
+    "./agents/rubysmithing-scaffold.md",
+    "./agents/rubysmithing-tui.md",
+    "./agents/rubysmithing-yardoc.md"
+  ]
 }

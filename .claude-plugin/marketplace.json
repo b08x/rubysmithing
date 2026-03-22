@@ -16,7 +16,7 @@
         "name": "b08x",
         "email": "b08x@users.noreply.github.com"
       },
-      "source": "./plugins/rubysmithing",
+      "source": "./",
       "category": "development"
     }
   ]

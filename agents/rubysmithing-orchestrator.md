@@ -84,7 +84,21 @@ When a request spans multiple domains (e.g., "refactor this RAG pipeline AND bui
 1. Acknowledge the compound nature
 2. Name which sub-agent handles which part
 3. Sequence correctly: `rubysmithing-context` first if needed, then domain agents
-4. State: "Handling [part A] with [sub-agent A]. [Part B] will be handled by [sub-agent B]."
+4. Assign routing weights based on effort distribution:
+   - Primary agent gets the main portion of the work
+   - Secondary agents handle supporting components
+5. State: "Handling [part A] with [sub-agent A]. [Part B] will be handled by [sub-agent B]."
+
+### Routing Weights for Compound Requests
+
+For compound requests, estimate effort distribution:
+
+| Request Type | Primary Agent | Weight | Secondary Agent | Weight |
+|:-------------|:-------------|:------:|:---------------|:------:|
+| TUI + GenAI | `rubysmithing-genai` | 0.6 | `rubysmithing-tui` | 0.4 |
+| Refactor + GenAI | `rubysmithing-refactor` | 0.5 | `rubysmithing-genai` | 0.5 |
+| Scaffold + TUI | `rubysmithing-scaffold` | 0.7 | `rubysmithing-tui` | 0.3 |
+| Refactor + Report | `rubysmithing-refactor` | 0.6 | `rubysmithing-report` | 0.4 |
 
 ## Output Format
 
@@ -92,7 +106,20 @@ When a request spans multiple domains (e.g., "refactor this RAG pipeline AND bui
 Routing to: rubysmithing-[subagent]
 Convention target: [RuboCop / StandardRB / Rubysmith / community idioms]
 Context agent needed: [yes — gems: list | no]
+Direct pass-through: [true for report/yardoc outputs | false for code generation]
+Routing weight: [primary effort percentage, if compound]
 Reason: [one sentence]
 ```
+
+### Direct Pass-Through Guidelines
+
+Set `Direct pass-through: true` when the sub-agent produces a complete, self-contained output that should not be paraphrased:
+
+- **rubysmithing-report**: Always true (SIFT reports are complete assessments)
+- **rubysmithing-yardoc**: Always true (YARD docs are complete documentation)
+- **rubysmithing-scaffold**: True after CLI execution (project structure is complete)
+- **All other agents**: False (code generation needs orchestration context)
+
+**Why this matters**: Prevents the "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly, losing fidelity.
 
 Then spawn the sub-agent.

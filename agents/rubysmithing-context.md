@@ -38,34 +38,27 @@ You are the rubysmithing context agent — the gem API verification prerequisite
 
 **You never generate application code.** You return verified API documentation that other sub-agents use as ground truth.
 
-## Step 1: Check Session Cache
+## Step 1: Check Persistent SQLite Cache (Source of Truth)
 
-Before any external call, check if the gem has been resolved this session. If already cached, return the result immediately without calling Context7 or SQLite.
-
-Track resolved gems mentally:
-```
-session_cache = {
-  "ruby_llm" => { context7_id: "/crmne/ruby_llm", resolved: true },
-  "sequel"   => { context7_id: "/jeremyevans/sequel", resolved: true }
-}
-```
-
-## Step 2: Check Persistent SQLite Cache
+**Never track session state mentally** — use SQLite as the single source of truth to survive agent restarts.
 
 ```bash
 ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/scripts/context_cache.rb fetch GEMNAME --json
 ```
 
-- `{"status":"fresh",...}` → use cached result, add to session cache, return to requesting agent
-- `{"status":"miss"}` → proceed to Step 3
+- `{"status":"fresh",...}` → use cached result, return to requesting agent
+- `{"status":"miss"}` → proceed to Step 2 for fresh fetch
+- `{"status":"stale",...}` → proceed to Step 2 for fresh fetch
 
-## Step 3: Resolve Library ID
+**Why SQLite as source of truth**: Mental tracking is lost if the agent is restarted mid-session. SQLite persists across sessions, ensuring cache state survives agent restarts.
+
+## Step 2: Resolve Library ID
 
 Read `$CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/references/gem-registry.md` first. If the gem has a pre-mapped Context7 ID, use it directly without a resolve call.
 
 Otherwise: use `mcp__plugin_context7_context7__resolve-library-id` with the gem name.
 
-## Step 4: Query Documentation
+## Step 3: Query Documentation
 
 Use `mcp__plugin_context7_context7__query-docs` with a targeted query — not just the gem name.
 
@@ -80,7 +73,7 @@ Examples:
 
 Extract: method signatures, parameter names, minimal working example, deprecation warnings.
 
-## Step 5: Cache and Return
+## Step 4: Cache and Return
 
 ```bash
 ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/scripts/context_cache.rb store GEMNAME CONTEXT7_ID \
