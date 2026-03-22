@@ -40,7 +40,7 @@ module Rubysmithing
     # Returns cached entry hash or nil if missing or past TTL.
     # Use this for the normal hot-path lookup.
     def fetch(gem_name)
-      row = @db[:gem_cache].where(gem_name: gem_name).first
+      row = @db[:gem_cache].where(gem_name:).first
       return nil unless row
 
       ttl = row[:ttl_days] || TTL_DAYS
@@ -54,7 +54,7 @@ module Rubysmithing
     # Use this as Tier 1 fallback when Context7 is unavailable or rate-limited.
     # Returns nil only if the gem has never been cached at all.
     def fetch_stale(gem_name)
-      row = @db[:gem_cache].where(gem_name: gem_name).first
+      row = @db[:gem_cache].where(gem_name:).first
       return nil unless row
 
       ttl = row[:ttl_days] || TTL_DAYS
@@ -69,16 +69,16 @@ module Rubysmithing
     # Upsert a resolved entry. ttl_days defaults to TTL_DAYS (7).
     def store(gem_name, context7_id:, method_sigs: [], example: nil, ttl_days: TTL_DAYS)
       payload = {
-        gem_name:    gem_name,
-        context7_id: context7_id,
+        gem_name:,
+        context7_id:,
         method_sigs: method_sigs.to_json,
-        example:     example,
+        example:,
         resolved_at: Time.now,
-        ttl_days:    ttl_days
+        ttl_days:,
       }
 
-      if @db[:gem_cache].where(gem_name: gem_name).count.positive?
-        @db[:gem_cache].where(gem_name: gem_name).update(payload)
+      if @db[:gem_cache].where(gem_name:).count.positive?
+        @db[:gem_cache].where(gem_name:).update(payload)
       else
         @db[:gem_cache].insert(payload)
       end
@@ -86,7 +86,7 @@ module Rubysmithing
 
     # Evict a stale or incorrect entry — useful when Context7 returns better docs.
     def evict(gem_name)
-      @db[:gem_cache].where(gem_name: gem_name).delete
+      @db[:gem_cache].where(gem_name:).delete
     end
 
     # List all cached gems with age and staleness status.
@@ -95,11 +95,11 @@ module Rubysmithing
         ttl  = row[:ttl_days] || TTL_DAYS
         age  = ((Time.now - row[:resolved_at]) / 86_400).round(1)
         {
-          gem:       row[:gem_name],
-          id:        row[:context7_id],
-          age_days:  age,
-          ttl_days:  ttl,
-          status:    age > ttl ? :stale : :fresh
+          gem: row[:gem_name],
+          id: row[:context7_id],
+          age_days: age,
+          ttl_days: ttl,
+          status: (age > ttl) ? :stale : :fresh,
         }
       end
     end
@@ -123,7 +123,7 @@ module Rubysmithing
           # Context7 could not resolve documentation for: #{gem_name}
           # The following code is based on training data and MAY be outdated or incorrect.
           # Verify against: https://rubygems.org/gems/#{gem_name} before use.
-          # Run: bundle exec ruby -e "require '#{gem_name}'; puts #{gem_name.gsub('-','_').split('_').map(&:capitalize).join}::VERSION rescue nil"
+          # Run: bundle exec ruby -e "require '#{gem_name}'; puts #{gem_name.gsub('-', '_').split('_').map(&:capitalize).join}::VERSION rescue nil"
         WARNING
       end
     end
@@ -132,12 +132,12 @@ module Rubysmithing
 
     def deserialize(row)
       {
-        gem_name:    row[:gem_name],
+        gem_name: row[:gem_name],
         context7_id: row[:context7_id],
         method_sigs: JSON.parse(row[:method_sigs] || "[]"),
-        example:     row[:example],
+        example: row[:example],
         resolved_at: row[:resolved_at],
-        ttl_days:    row[:ttl_days] || TTL_DAYS
+        ttl_days: row[:ttl_days] || TTL_DAYS,
       }
     end
 
@@ -152,9 +152,9 @@ module Rubysmithing
       end
 
       # Add ttl_days column to existing databases that predate this schema version.
-      unless @db[:gem_cache].columns.include?(:ttl_days)
-        @db.alter_table(:gem_cache) { add_column :ttl_days, Integer, default: 7 }
-      end
+      return if @db[:gem_cache].columns.include?(:ttl_days)
+
+      @db.alter_table(:gem_cache) { add_column :ttl_days, Integer, default: 7 }
     end
   end
 end
@@ -178,7 +178,7 @@ if __FILE__ == $PROGRAM_NAME
 
   serialize_for_json = lambda do |entry|
     entry.merge(resolved_at: entry[:resolved_at]&.strftime("%Y-%m-%d"))
-         .transform_keys(&:to_s)
+      .transform_keys(&:to_s)
   end
 
   case args[0]
@@ -243,7 +243,7 @@ if __FILE__ == $PROGRAM_NAME
       exit 1
     end
     example = args[4]
-    cache.store(gem_name, context7_id: context7_id, method_sigs: method_sigs, example: example)
+    cache.store(gem_name, context7_id:, method_sigs:, example:)
     if json_mode
       puts JSON.generate({ "status" => "stored", "gem_name" => gem_name })
     else

@@ -10,26 +10,26 @@ module AppName
     # automatically. The TUI remains usable via bold/dim/underline alone.
     COLORS = {
       # Foreground
-      fg_default:   "#D8DEE9",  # body text
-      fg_muted:     "#7B8394",  # secondary text, metadata, timestamps
-      fg_emphasis:  "#FFFFFF",  # headers, focused items, titles
-      fg_on_accent: "#000000",  # text on accent-colored background
+      fg_default: "#D8DEE9", # body text
+      fg_muted: "#7B8394", # secondary text, metadata, timestamps
+      fg_emphasis: "#FFFFFF", # headers, focused items, titles
+      fg_on_accent: "#000000", # text on accent-colored background
 
       # Background
-      bg_base:      "#1A1B26",  # primary app background (darkest)
-      bg_surface:   "#24283B",  # panel / widget backgrounds
-      bg_overlay:   "#2F3549",  # popup / dialog backgrounds
-      bg_selection: "#364A82",  # selected item highlight
+      bg_base: "#1A1B26", # primary app background (darkest)
+      bg_surface: "#24283B",  # panel / widget backgrounds
+      bg_overlay: "#2F3549",  # popup / dialog backgrounds
+      bg_selection: "#364A82", # selected item highlight
 
       # Accent
-      accent_primary:   "#7AA2F7",  # interactive elements, focus borders
-      accent_secondary: "#BB9AF7",  # supporting interactions, hints
+      accent_primary: "#7AA2F7", # interactive elements, focus borders
+      accent_secondary: "#BB9AF7", # supporting interactions, hints
 
       # Status — always pair with a symbol; never rely on color alone
-      status_error:   "#F7768E",  # ✗ error
+      status_error: "#F7768E", # ✗ error
       status_warning: "#E0AF68",  # ⚠ warning
       status_success: "#9ECE6A",  # ✓ success
-      status_info:    "#7DCFFF"   # ℹ info
+      status_info: "#7DCFFF", # ℹ info
     }.freeze
 
     # ── Structural Styles (consume tokens above) ─────────────────────────

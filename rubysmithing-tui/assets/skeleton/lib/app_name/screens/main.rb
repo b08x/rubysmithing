@@ -20,10 +20,13 @@ module AppName
       end
 
       def view
-        content = @state.items.empty? ? "  (empty)" :
+        content = if @state.items.empty?
+          "  (empty)"
+        else
           @state.items.each_with_index.map do |item, i|
-            i == @state.cursor ? "▶ #{item}" : "  #{item}"
+            (i == @state.cursor) ? "▶ #{item}" : "  #{item}"
           end.join("\n")
+        end
 
         Styles::PANEL.render(content)
       end

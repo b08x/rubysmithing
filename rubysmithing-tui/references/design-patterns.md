@@ -3,7 +3,11 @@
 Architectural decisions for Ruby TUI applications. Covers layout selection,
 color systems, keyboard architecture, help systems, and quality checklists.
 
-For API syntax (component code examples), see `tui-patterns.md`.
+For API syntax (component code examples), see `tui-patterns.md` — all patterns
+are verified against Context7. The canonical verified source is `docker/prompt.txt`.
+
+> **Important:** `tui-patterns.md` is the verified reference. If you find patterns
+> here that contradict it, use `docker/prompt.txt` as the source of truth.
 
 ---
 

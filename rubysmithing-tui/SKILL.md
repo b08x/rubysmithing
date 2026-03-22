@@ -1,5 +1,6 @@
 ---
 name: rubysmithing-tui
+requires: [rubysmithing-context]
 description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Bubbles, bubbles (UI components), Huh, huh form, form validation, Gum, gum prompts, NTCharts, charts, data visualization, Bubblezone, Glamour, glamour rendering, markdown display, Harmonica, harmonica animations, spring physics, smooth transitions, animated scrolling, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, text input, spinner, list selection, metrics display, animated transitions, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
 ---
 
@@ -203,10 +204,13 @@ needs updating.
 
 ## BubbleTea Conventions
 
-- State is always `Struct.new(keyword_init: true)` — never instance variables mutated directly
-- Update is a pure function: receives message, returns `[self, command]` or `[self, Bubbletea.quit]`
-- View is a pure function: no I/O, no side effects
-- Styles are module-level constants in `styles.rb` — never inline in `view`
+- State in plain `@ivar` — NOT `Struct.with` for App models (Bubbletea passes `self`; Struct copies break reference)
+- Update returns `[self, command]` — ALWAYS (never `nil` or bare model)
+- `Bubbletea.quit` (module method) — NOT `BubbleTea::Quit`
+- `message.to_s` returns key strings: `"up"`, `"down"`, `"j"`, `"k"`, `"q"`, `"ctrl+c"`
+- View is pure function: no I/O, no side effects
+- Styles as module-level constants in `styles.rb` — never inline in `view`
+- All Lipgloss/Bubbles calls through `Components::Base` adapter — never inline
 
 ## Design System Reference
 
@@ -223,28 +227,30 @@ Load `references/design-patterns.md` for architectural decisions:
 
 ## Patterns Reference
 
-Load `references/tui-patterns.md` for:
-- Root App and Screen structural templates
-- Styles module conventions
-- Two-pane layout recipe
-- Bubbles::TextInput for interactive text entry
-- Bubbles::List for item selection and navigation
-- Bubbles::Spinner for loading states
-- Bubbles::Cursor for custom text cursors
-- Bubbles::Help for key binding documentation
-- Gum utility functions for external prompts
-- Huh form components with validation and themes
-- Huh input, select, and confirm fields
-- Glamour markdown rendering with custom styles
-- Glamour renderer instances for consistent formatting
-- NTCharts line charts and time series visualization
-- NTCharts bar charts and data display
-- Harmonica spring animations for smooth transitions
-- Harmonica animated scrolling and UI state changes
-- Mouse zones (bubblezone)
-- Streaming output component
-- Human-in-the-loop component
-- Entry point (app.rb) template
+Load `references/tui-patterns.md` for verified component code examples. All patterns are
+Context7-verified. If patterns here contradict `docker/prompt.txt`, use the prompt file
+as source of truth.
+
+Verified Context7 IDs (pre-mapped — no resolution calls needed):
+
+| Gem | Context7 ID |
+|:---|:---|
+| bubbletea | `/marcoroth/bubbletea-ruby` |
+| lipgloss | `/marcoroth/lipgloss-ruby` |
+| bubbles | `/marcoroth/bubbles-ruby` |
+| huh | `/marcoroth/huh-ruby` |
+| gum | `/marcoroth/gum-ruby` |
+| ntcharts | `/marcoroth/ntcharts-ruby` |
+| glamour | `/marcoroth/glamour-ruby` |
+| harmonica | `/marcoroth/harmonica-ruby` |
+| bubblezone | `/marcoroth/bubblezone-ruby` |
+
+Key verified patterns:
+- **Entry:** `Bubbletea.run(App.new)` — NOT `BubbleTea::Program.new`
+- **Quit:** `Bubbletea.quit` — NOT `BubbleTea::Quit`
+- **Colors:** `.foreground("#HEX")` — NO `Lipgloss::Color.new` wrapper
+- **Alignment:** `:left`, `:top` symbols — NOT `Lipgloss::Align::LEFT`
+- **State:** plain `@ivar` for App models — NOT `Struct.with`
 
 ## Domain → Component Mapping
 

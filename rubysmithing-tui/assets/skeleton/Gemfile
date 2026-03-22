@@ -8,12 +8,12 @@ gem "tty-config"
 gem "zeitwerk"
 
 # TUI stack
-gem "bubbletea"
-gem "lipgloss"
 gem "bubbles"
-gem "huh"
-gem "gum"
+gem "bubbletea"
 gem "glamour"
+gem "gum"
+gem "huh"
+gem "lipgloss"
 
 # Add as needed:
 # gem "bubblezone"   # mouse events

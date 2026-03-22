@@ -18,26 +18,26 @@ module AppName
     module Keyboard
       # L0: Universal — wire in every app
       L0 = {
-        up:        :cursor_up,
-        down:      :cursor_down,
-        left:      :focus_prev,
-        right:     :focus_next,
-        enter:     :confirm,
-        escape:    :cancel_or_back,
-        tab:       :focus_next_panel,
+        up: :cursor_up,
+        down: :cursor_down,
+        left: :focus_prev,
+        right: :focus_next,
+        enter: :confirm,
+        escape: :cancel_or_back,
+        tab: :focus_next_panel,
         shift_tab: :focus_prev_panel,
-        "q":       :quit
+        q: :quit,
       }.freeze
 
       # L1: Vim motions — include when domain is navigation-heavy
       # Note: "h" (collapse/back) takes priority over any domain mnemonic
       L1 = {
-        "j": :cursor_down,
-        "k": :cursor_up,
-        "h": :collapse_or_back,
-        "l": :expand_or_forward,
-        "g": :goto_top,
-        "G": :goto_bottom
+        j: :cursor_down,
+        k: :cursor_up,
+        h: :collapse_or_back,
+        l: :expand_or_forward,
+        g: :goto_top,
+        G: :goto_bottom,
       }.freeze
 
       # L2: Domain-specific action mnemonics — populate per-app.

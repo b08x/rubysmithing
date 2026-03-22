@@ -46,7 +46,7 @@ module AppName
 
     def active_screen
       @screens ||= {
-        main: Screens::Main.new
+        main: Screens::Main.new,
         # TODO: add screens here
       }
       @screens[@state.active_screen]
