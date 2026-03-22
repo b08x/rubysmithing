@@ -1,0 +1,203 @@
+Use the rubysmithing-tui skill to scaffold a complete "Skill Browser" TUI application.
+
+## Step 0: Initialize with Rubysmith
+
+Run the following to generate the project skeleton before writing any TUI files:
+
+  cd ./output && rubysmith build --name skill_browser
+
+This produces the standard lib layout, Gemfile, .rubocop.yml, and Zeitwerk wiring.
+Convention target is therefore RuboCop (.rubocop.yml present).
+
+Then add/overwrite only these files on top of the generated structure:
+
+./output/skill_browser/
+├── app.rb                          ← entry point (create/replace)
+├── Gemfile                         ← add TUI gems to rubysmith baseline
+└── lib/skill_browser/
+    ├── app.rb                      ← create
+    ├── styles.rb                   ← create
+    ├── data/skill_loader.rb        ← create
+    ├── screens/main.rb             ← create
+    └── components/
+        ├── base.rb                 ← create
+        └── keyboard.rb            ← create
+
+Do NOT remove any file rubysmith generated. Overlay only.
+
+## App Spec
+
+Name:   skill_browser  (snake_case files, SkillBrowser module, SKILL_BROWSER constant)
+Layout: Three-row vertical: header / two-pane body / status bar
+Domain: Skill browser — reads SKILL.md files from skills/
+
+Two-pane body:
+- Left: sidebar list, inner width 30
+- Right: main detail panel, fills remaining terminal width
+
+## Bubbletea::Model Interface Contract (required — do not omit)
+
+Every Bubbletea application model MUST:
+
+1. Include the mixin:
+     include Bubbletea::Model
+
+2. Implement init — called once at startup:
+     def init
+       [self, nil]   # [model, command] — nil means no startup command
+     end
+
+3. Implement update — called on every message, MUST return [self, command]:
+     def update(message)
+       case message
+       when Bubbletea::WindowSizeMessage  → [self, nil]
+       when Bubbletea::KeyMessage         → [self, nil] or [self, Bubbletea.quit]
+       else                               → [self, nil]
+       end
+     end
+     # Every branch MUST return [self, command]. Returning nil crashes the runner.
+
+4. Implement view — pure function, no I/O:
+     def view
+       # return String
+     end
+
+State lives in plain instance variables (@ivar). Do NOT use Struct#with for
+model-level state — Bubbletea passes `self` to the runner; Struct copies break
+the reference. Structs are correct for value objects (SkillLoader::Skill), not
+for the App or Screen models themselves.
+
+## Entry Point Load Order (required — do not change order)
+
+  require "bundler/setup"
+  require "zeitwerk"
+  require "bubbletea"
+  require "lipgloss"          ← MUST come before loader.setup
+                               styles.rb defines Lipgloss constants at module load time
+
+  loader = Zeitwerk::Loader.new
+  loader.push_dir("#{__dir__}/lib")
+  loader.setup
+
+  SKILL_BROWSER = "SkillBrowser"
+
+  Bubbletea.run(SkillBrowser::App.new)
+
+## Keyboard Routing (required — wire it, do not leave it as dead code)
+
+App resolves keys to action symbols and forwards them to the screen:
+
+  # In App#update:
+  when Bubbletea::KeyMessage
+    action = Components::Keyboard.resolve(message.to_s, layers: [:l0, :l1])
+    case action
+    when :quit        → [self, Bubbletea.quit]
+    when nil          → [self, nil]
+    else              → @screen.update(action); [self, nil]
+    end
+
+Screen#update receives action symbols only — never raw Bubbletea::KeyMessage:
+
+  def update(message)
+    case message
+    when Bubbletea::WindowSizeMessage  # nothing to cache; width passed into view
+    when :cursor_up
+      return if @skills.empty?
+      @cursor = [@cursor - 1, 0].max
+      reload_content
+    when :cursor_down
+      return if @skills.empty?
+      @cursor = [@cursor + 1, @skills.length - 1].min
+      reload_content
+    end
+  end
+
+Components::Keyboard maps:
+  L0: "up" → :cursor_up, "down" → :cursor_down, "q" → :quit
+  L1: "k"  → :cursor_up, "j"   → :cursor_down
+
+## Data Layer (skill_loader.rb)
+
+SkillBrowser::Data::SkillLoader:
+- Gem: front_matter_parser (Context7 ID: /waiting-for-dev/front_matter_parser)
+  require "front_matter_parser"   ← replaces manual YAML slicing entirely
+- Dir.glob("skills/**/SKILL.md").map (not filter_map — no filtering occurs)
+- Parse frontmatter with:
+    parsed = FrontMatterParser::Parser.parse_file(path)
+    name   = parsed.front_matter["name"]
+  Returns {} (not nil) when no frontmatter present — no rescue needed
+- Return Array of Struct.new(:name, :path, keyword_init: true), sorted by name
+- Expose content(skill) → File.read(skill.path) with rescue Errno::ENOENT returning a safe string
+- Fallback name: File.basename(File.dirname(path)) when name is absent or not a non-empty String
+
+## Functional Requirements
+
+Header (top):
+- Render SKILL_BROWSER constant via Components::Base.header
+
+Sidebar (left, width 30 inner):
+- Load all skills via SkillBrowser::Data::SkillLoader.new.load in Screen#initialize
+- Render each skill name; prefix selected row with "▶ "
+- ↑/↓ and j/k navigate (via action symbols from App)
+
+Main panel (right, fills remaining width):
+- Display raw File.read content of selected skill's SKILL.md
+- Plain text only — no markdown rendering
+- Width = terminal_width - SIDEBAR_OUTER_WIDTH - MAIN_PANEL_CHROME
+  where SIDEBAR_OUTER_WIDTH = 34 (30 content + 2 border + 2 padding)
+        MAIN_PANEL_CHROME   =  4 (2 border + 2 padding)
+  floor at 20 columns minimum
+
+Status bar (bottom):
+- Show selected_name from active screen
+
+Keys: ↑/↓ navigate (L0), j/k vim navigation (L1), q quit
+
+## Context7 IDs — pre-mapped, no resolution calls needed
+
+bubbletea: /marcoroth/bubbletea-ruby
+lipgloss:  /marcoroth/lipgloss-ruby
+bubbles:   /marcoroth/bubbles-ruby
+
+## Verified API — use exactly as written
+
+Entry point:      Bubbletea.run(SkillBrowser::App.new)
+Quit command:     Bubbletea.quit  (return as [self, Bubbletea.quit])
+Resize message:   Bubbletea::WindowSizeMessage  (.width, .height accessors)
+Key message:      Bubbletea::KeyMessage  (message.to_s → "up", "down", "j", "k", "q")
+Horizontal join:  Lipgloss.join_horizontal(:top, left, right)
+Vertical join:    Lipgloss.join_vertical(:left, header, body, footer)
+Style width:      Lipgloss::Style.new.width(n)   — also works as chain on existing style
+Colors:           .foreground("#HEXSTR")  — no Lipgloss::Color.new wrapper
+Alignment:        :left, :top symbols    — not Lipgloss::Align::LEFT
+
+## Gemfile — add TUI gems to rubysmith baseline
+
+Append to whatever rubysmith generated:
+
+  gem "bubbletea"
+  gem "lipgloss"
+  gem "bubbles"
+  gem "front_matter_parser"
+
+(zeitwerk, dotenv, tty-config are likely already present from rubysmith)
+
+## Scope Limiter — do not add
+
+- async or circuit_breaker
+- dry-schema or dry-types
+- journald-logger (use no logging — not even warn/info)
+- glamour or any markdown renderer
+- huh, gum, ntcharts, harmonica, bubblezone
+
+## Conventions
+
+- frozen_string_literal: true on every .rb file
+- Struct.new(keyword_init: true) for value objects only (SkillLoader::Skill)
+- App and Screen state in plain @ivars — not Struct models
+- All Lipgloss/Bubbles calls routed through Components::Base (never inline in screens)
+- Styles are module-level constants in styles.rb only — never inline Lipgloss::Style.new elsewhere
+- Named constants for layout arithmetic (SIDEBAR_OUTER_WIDTH, MAIN_PANEL_CHROME)
+- No puts, no p, no logging, no inline rescue
+
+Write all files completely. No placeholders, no TODOs, no truncation.

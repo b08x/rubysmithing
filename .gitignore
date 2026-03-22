@@ -3,3 +3,4 @@ repomix.config.json
 rubysmithing-skills.xml
 .repomixignore
 logs/
+output/

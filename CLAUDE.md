@@ -4,147 +4,125 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby development with AI assistance. It uses a hub-and-spoke architecture where the central `rubysmithing` skill routes requests to specialized sub-skills for code generation, refactoring, quality assessment, TUI building, and GenAI orchestration.
+Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby development with AI assistance. It uses a hub-and-spoke architecture where the central `rubysmithing` skill routes requests to specialized sub-skills.
 
-## Architecture
+## No Build System
 
-### Hub-and-Spoke Skill System
+This repository contains skill definitions, not executable code. There are no tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The one executable artifact is:
 
-- **rubysmithing** (Hub): Central router for Ruby code generation, POROs, Rake tasks, and config wiring
-- **rubysmithing-context**: Gem API verification using Context7 MCP server; prerequisite for all code-generating skills
-- **rubysmithing-genai**: AI/NLP components (chatbots, RAG pipelines, DSPy modules, MCP servers)
-- **rubysmithing-tui**: Terminal UI scaffolding with Charm/Bubble ecosystem
-- **rubysmithing-refactor**: Convention-targeted code fixes and anti-pattern removal
-- **rubysmithing-report**: QA assessment using SIFT Protocol V1.0
-- **rubysmithing-yardoc**: YARD documentation generation with semantic AST analysis and type inference
+```bash
+ruby rubysmithing-context/scripts/context_cache.rb list       # cached gems + staleness
+ruby rubysmithing-context/scripts/context_cache.rb check <gem>  # fresh fetch (TTL-aware)
+ruby rubysmithing-context/scripts/context_cache.rb stale <gem>  # stale fetch + warning block
+ruby rubysmithing-context/scripts/context_cache.rb evict <gem>  # force re-resolution
+```
 
-### Skill Workflow
+## Hub-and-Spoke Skill Architecture
 
-1. **rubysmithing-context** verifies gem APIs before any library-specific code
-2. **rubysmithing** (Hub) detects Lite vs Standard mode based on task scope
-3. Sub-skills generate or refactor components independently
-4. **rubysmithing-report** provides final QA validation
+| Skill | Role |
+|:---|:---|
+| **rubysmithing** | Hub: routes tasks, handles POROs/Rake tasks/config wiring directly |
+| **rubysmithing-context** | Prerequisite for all code-generating skills; verifies gem APIs via Context7 |
+| **rubysmithing-scaffold** | Project initialization; generates full Rubysmith/Gemsmith skeletons |
+| **rubysmithing-genai** | AI/NLP components: chatbots, RAG pipelines, DSPy modules, MCP servers |
+| **rubysmithing-tui** | Terminal UI scaffolding with Charm/Bubble ecosystem |
+| **rubysmithing-refactor** | Convention-targeted code fixes; runs Pre-Refactor Audit phase first |
+| **rubysmithing-report** | QA assessment via SIFT Protocol V1.0 |
+| **rubysmithing-yardoc** | YARD docs with semantic AST analysis and type inference |
+
+**Routing order:** rubysmithing-context → rubysmithing (hub, Lite/Standard mode) → sub-skill → rubysmithing-report (QA).
+
+Skills declare prerequisites in frontmatter:
+```yaml
+---
+name: rubysmithing-yardoc
+requires: [rubysmithing-context]
+---
+```
 
 ## Execution Modes
 
-### Lite Mode (single-file output ≤50 lines, or explicitly simple tasks)
+**Lite** — single-file ≤50 lines, pure stdlib, no architectural mandates. Triggered by: "quick script", "simple utility", "one-off", "stdlib only".
 
-- Pure Ruby stdlib only
-- No `dry-schema`, `async`, `circuit_breaker`
-- No architectural mandates
-- Triggered by: "quick script", "simple utility", "one-off", "stdlib only"
-- **Multi-file scaffold requests always trigger Standard Mode** regardless of per-file line count
+**Standard** (default) — full stack: async fibers, circuit_breaker, journald-logger, dry-schema, Zeitwerk compliance, `# frozen_string_literal: true` on every file. **Multi-file scaffold requests always use Standard Mode** regardless of per-file line count.
 
-### Standard Mode (default)
+## Convention Detection
 
-- Full stack conventions enforced
-- Async fibers, circuit breakers, structured logging
-- Zeitwerk compliance required
-- All files start with `# frozen_string_literal: true`
+Canonical cascade lives in `rubysmithing/references/convention-detection.md` — all skills reference that file, never duplicate it.
 
-## Technology Stack Reference
+1. `.rubocop.yml` present → RuboCop config
+2. `standard` in Gemfile → StandardRB
+3. `.rubysmith` / `rubysmith` gem → Rubysmith defaults
+4. None → community idioms from `rubysmithing/references/conventions.md`
+
+## Key Conventions (Standard Mode)
+
+- Zeitwerk: file paths mirror module/class hierarchy exactly (`lib/app_name/data/processor.rb` → `AppName::Data::Processor`)
+- `Struct.new(keyword_init: true)` for value objects
+- Keyword args for 3+ parameter methods; guard clauses over nested conditionals
+- `module_function` not `extend self`
+- `Async { }` not `Thread.new`; `circuit_breaker` wrapping all external calls
+- `journald-logger` for structured logging — never `puts`
+
+## TUI Architecture (rubysmithing-tui)
+
+The skill has two reference layers — keep them separate:
+
+- **`references/tui-patterns.md`** — Bubble gem API syntax and component code examples. **Known debt:** contains stale `Lipgloss::Align::LEFT`, `BubbleTea::Program`, and `Lipgloss::Color.new` patterns that conflict with verified Context7 API. Do not use these as authoritative syntax; run rubysmithing-context for live verification.
+- **`references/design-patterns.md`** — Architectural decisions: layout paradigm selector (7 paradigms), semantic color tokens, four-layer keyboard architecture (L0–L3), three-tier help system, focus management, command palette pattern, anti-pattern checklist, compatibility checklist.
+
+**Skeleton** lives in `assets/skeleton/`. Copy and rename `app_name` → snake_case, `AppName` → CamelCase, `APP_NAME` → SCREAMING_SNAKE.
+
+Verified Bubble gem API conventions (confirmed via Context7):
+- Entry point: `Bubbletea.run(App.new)` — not `BubbleTea::Program.new`
+- Quit: `Bubbletea.quit` — not `BubbleTea::Quit`
+- Resize: `Bubbletea::WindowSizeMessage` — not `WindowSizeMsg`
+- Key events: `message.to_s` returns `"up"`, `"j"`, `"ctrl+c"` etc. — match as strings
+- Lipgloss colors: `.foreground("#HEXSTR")` — no `Lipgloss::Color.new` wrapper
+- Lipgloss alignment: `:left`, `:top` symbols — not `Lipgloss::Align::LEFT`
+- Bubbles::Help: `Bubbles::Key.binding(keys:, help:)` + `help.short_help_view(bindings)`
+
+The `Components::Base` adapter module isolates all Bubble API calls. Screens and components never call Lipgloss/Bubbles directly — always through `Components::Base`.
+
+## rubysmithing-context: Tiered Degradation
+
+When Context7 is unavailable or rate-limited:
+1. Serve stale SQLite cache with warning block injected into output
+2. Retry using pre-mapped ID from `references/gem-registry.md`
+3. Inject `[WARNING: Unverified API Syntax]` as last resort — never silently proceed
+
+## Context7 MCP Integration
+
+Use `mcp__plugin_context7_context7__resolve-library-id` then `mcp__plugin_context7_context7__query-docs`.
+
+**Confirmed library IDs for this stack:**
+
+| Gem | Library ID |
+|:---|:---|
+| bubbletea-ruby | `/marcoroth/bubbletea-ruby` |
+| lipgloss-ruby | `/marcoroth/lipgloss-ruby` |
+| bubbles-ruby | `/marcoroth/bubbles-ruby` |
+| huh-ruby | `/marcoroth/huh-ruby` |
+| harmonica-ruby | `/marcoroth/harmonica-ruby` |
+| ntcharts-ruby | `/marcoroth/ntcharts-ruby` |
+| glamour-ruby | `/marcoroth/glamour-ruby` |
+| gum-ruby | `/marcoroth/gum-ruby` |
+| bubblezone-ruby | `/marcoroth/bubblezone-ruby` |
+| Rubysmith CLI | `/websites/alchemists_io_projects_rubysmith` |
+| Gemsmith | `/bkuhlmann/gemsmith` |
+| ClaudeBox | `/rchgrav/claudebox` |
+
+## Creating or Modifying Skills
+
+Each skill requires a `SKILL.md` with YAML frontmatter (`name`, `description`, optional `requires`), a `references/` directory, and clear activation triggers. Never use `README.md` for skill definitions. SKILL.md should stay under 500 lines; use `references/` files for anything larger and cite them by section from SKILL.md.
+
+## Technology Stack
 
 | Layer | Gems |
-|-------|------|
-| **TUI** | bubbletea, lipgloss, bubbles, huh, gum, ntcharts |
+|:---|:---|
+| **TUI** | bubbletea, lipgloss, bubbles, huh, gum, ntcharts, harmonica, glamour, bubblezone |
 | **AI** | ruby_llm, dspy.rb, ruby_llm-mcp |
 | **Async** | async, circuit_breaker |
 | **Storage** | sequel, pgvector, dry-types, dry-schema |
 | **Logic** | zeitwerk, dotenv, tty-config |
 | **Logging** | journald-logger |
-
-## Convention Detection Priority
-
-Canonical definition lives in `rubysmithing/references/convention-detection.md`.
-All skills reference that file rather than repeating the cascade. Summary:
-
-1. `.rubocop.yml` present → use RuboCop config
-2. `standard` in Gemfile → use StandardRB
-3. `.rubysmith` / `rubysmith` gem → use Rubysmith defaults
-4. None → apply community idioms from `rubysmithing/references/conventions.md`
-
-## Key Conventions (Standard Mode)
-
-### File Structure
-
-- Zeitwerk compliance: file paths must mirror module/class hierarchy exactly
-- `lib/app_name/data/processor.rb` → `AppName::Data::Processor`
-
-### Code Style
-
-- Two-space indent, no tabs
-- `snake_case` methods/vars, `CamelCase` classes, `SCREAMING_SNAKE` constants
-- `Struct.new(keyword_init: true)` for value objects
-- Keyword args for 3+ parameter methods
-- Guard clauses over nested conditionals
-- `module_function` not `extend self`
-
-### Async & Reliability
-
-- `Async { }` blocks instead of `Thread.new` for I/O
-- `circuit_breaker` wrapping all external API calls
-- `journald-logger` for structured logging, never `puts`
-
-## TUI Architecture Pattern
-
-TUI applications use an adapter pattern to isolate from Bubble ecosystem API changes:
-
-```ruby
-# lib/app_name/components/base.rb
-module Components::Base
-  def self.panel(content, style: Styles::PANEL)
-    # Internal adapter - if APIs change, update here only
-  end
-end
-```
-
-All screens call `Components::Base.panel(...)` instead of Bubble APIs directly.
-
-## Development Workflow
-
-### Creating New Skills
-
-Each skill requires:
-
-- `SKILL.md` with name, description, triggers, and step-by-step workflow
-- `references/` directory with domain-specific patterns and conventions
-- Clear activation triggers and delegation rules to other skills
-
-### Generating Code
-
-- Always run `rubysmithing-context` first for gem API verification
-- Generate complete files - no truncation or stubs
-- Include file path, complete content, rationale, and Gemfile additions
-- Specify which mode was applied (Lite/Standard + convention target)
-
-### Working with Skeletons
-
-TUI applications copy from `rubysmithing-tui/assets/skeleton/` and rename throughout:
-
-- `app_name` → actual snake_case name
-- `AppName` → actual CamelCase module
-- `APP_NAME` → actual SCREAMING_SNAKE constant
-
-## Context7 MCP Integration
-
-Context7 MCP is available for fetching up-to-date Rubysmith documentation with code examples.
-
-**Recommended library IDs**:
-
-- `/websites/alchemists_io_projects_rubysmith` - Rubysmith CLI for generating Ruby project skeletons with customizable build options
-- `/bkuhlmann/gemsmith` - Gemsmith CLI for creating, building, and publishing professional Ruby gems with advanced tooling
-
-To query documentation:
-1. Use `context7_resolve-library-id` first if needed
-2. Then use `context7_query-docs` with the library ID
-
-## No Build System
-
-This repository contains skill definitions, not executable code. There are no:
-
-- Test suites (specs only generated on explicit request for TUI Update functions)
-- Build scripts or Rakefile
-- Package managers beyond individual skill Gemfiles
-- CI/CD pipelines
-
-Skills are designed to be loaded into a larger agent system that handles the execution environment.
