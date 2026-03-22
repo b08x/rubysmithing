@@ -21,6 +21,7 @@ Each operates independently. Load them when the task clearly falls in their doma
 | `rubysmithing-refactor` | Convention fixes, anti-pattern removal, Zeitwerk compliance |
 | `rubysmithing-report` | SIFT QA audit, design review, tech advisory |
 | `rubysmithing-yardoc` | YARD documentation generation with semantic type inference |
+| `rubysmithing-scaffold` | Project initialization via rubysmith or gemsmith CLI |
 
 ## Step 1: Detect Mode
 
@@ -31,6 +32,10 @@ or a clearly small self-contained task.
 
 **Multi-file scaffold requests always trigger Standard Mode** regardless of individual
 file line count. If the task would produce more than one file, apply Standard Mode.
+
+For **new project initialization** (rubysmith or gemsmith scaffold): delegate to
+`rubysmithing-scaffold`. This skill handles code within an existing project;
+rubysmithing-scaffold handles the project skeleton itself.
 
 In Lite Mode:
 

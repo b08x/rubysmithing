@@ -125,6 +125,19 @@ TUI applications copy from `rubysmithing-tui/assets/skeleton/` and rename throug
 - `AppName` → actual CamelCase module
 - `APP_NAME` → actual SCREAMING_SNAKE constant
 
+## Context7 MCP Integration
+
+Context7 MCP is available for fetching up-to-date Rubysmith documentation with code examples.
+
+**Recommended library IDs**:
+
+- `/websites/alchemists_io_projects_rubysmith` - Rubysmith CLI for generating Ruby project skeletons with customizable build options
+- `/bkuhlmann/gemsmith` - Gemsmith CLI for creating, building, and publishing professional Ruby gems with advanced tooling
+
+To query documentation:
+1. Use `context7_resolve-library-id` first if needed
+2. Then use `context7_query-docs` with the library ID
+
 ## No Build System
 
 This repository contains skill definitions, not executable code. There are no:
