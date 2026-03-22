@@ -26,6 +26,16 @@ skills/                      # 8 auto-discovering skill definitions
   rubysmithing-yardoc/       # YARD docs with type inference
 ```
 
+## Prerequisites
+
+- **Context7 MCP** — required by `rubysmithing-context` for live gem API resolution. Add to Claude Code MCP settings:
+  ```json
+  { "context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] } }
+  ```
+  Without it, tiered degradation activates automatically (stale cache → WARNING blocks).
+
+- **jq** — required by the PostToolUse convention hook. Install via `apt install jq` or `brew install jq`. The hook degrades gracefully (no-op) if absent.
+
 ## No Build System
 
 This repository contains skill and agent definitions, not executable code. No tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The one executable artifact is:
@@ -36,6 +46,11 @@ ruby skills/rubysmithing-context/scripts/context_cache.rb check <gem>  # fresh f
 ruby skills/rubysmithing-context/scripts/context_cache.rb stale <gem>  # stale fetch + warning block
 ruby skills/rubysmithing-context/scripts/context_cache.rb evict <gem>  # force re-resolution
 ```
+
+## Hooks Behavior
+
+- **PostToolUse (Write|Edit)** — fires `check-ruby-conventions.sh` on every file write/edit. The script filters to `.rb` files and validates conventions against the detected target (RuboCop / StandardRB / community idioms). Requires `jq`.
+- **Stop** — after any session that produced `.rb` files, injects a prompt suggesting the user run `/rubysmithing:report` for SIFT QA assessment. Omitted for explanation-only or research sessions.
 
 ## Orchestrator / Sub-Agent Architecture
 
@@ -52,6 +67,18 @@ The plugin uses a thin routing orchestrator (`agents/rubysmithing-orchestrator.m
 | **rubysmithing-refactor** | Convention-targeted refactoring + Pre-Refactor Audit |
 | **rubysmithing-report** | SIFT Protocol V1.0 QA assessment |
 | **rubysmithing-yardoc** | YARD docs with semantic AST analysis and type inference |
+
+**Routing table (from orchestrator):**
+
+| User Intent | Sub-Agent | Context needed? |
+|:---|:---|:---|
+| New project, scaffold, rubysmith, gemsmith | `rubysmithing-scaffold` | No |
+| LLM, RAG, chatbot, DSPy, MCP, embeddings, NLP | `rubysmithing-genai` | Yes |
+| TUI, BubbleTea, Lipgloss, Huh, Gum, Bubbles | `rubysmithing-tui` | Yes |
+| Refactor, fix conventions, RuboCop violations | `rubysmithing-refactor` | No |
+| Assess, SIFT, QA, review, code quality | `rubysmithing-report` | No |
+| YARD, documentation, @param, @return | `rubysmithing-yardoc` | If non-stdlib gems present |
+| Classes, modules, Rake, config, POROs, pipelines | `rubysmithing` (main) | If gem-specific code |
 
 **Routing order:** orchestrator → rubysmithing-context (if gems) → domain agent → (optional) rubysmithing-report
 
