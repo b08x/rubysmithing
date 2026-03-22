@@ -25,6 +25,23 @@ Before generating any scaffold or component code:
 5. **Identify external data flows** — what systems does this TUI interact with?
    If AI/LLM systems are involved, note the rubysmithing-genai dependency.
 
+## Step 1b: Select Layout Paradigm
+
+After domain analysis, select the structural layout before generating any skeleton code.
+Load `references/design-patterns.md` Section 1 for anatomy diagrams and responsive strategies.
+
+| Domain Signal | Paradigm | Skeleton Shape |
+|:---|:---|:---|
+| File browser / explorer | Miller Columns | Three panes: nav / content / preview |
+| Git, CI/CD, DevOps | Persistent Multi-Panel | Fixed sidebar + main + log strip |
+| System / process monitor | Widget Dashboard | Grid of independent metric panels |
+| Data browser / catalog | Drill-Down Stack | Push/pop screen stack, Esc ascends |
+| SQL, HTTP, IDE workflow | IDE Three-Panel | File tree / editor / output bottom |
+| Shell augmentation | Overlay / Popup | Base view + modal layer on demand |
+| Log viewer / event stream | Header + Scrollable List | Fixed header + virtual scroll body |
+
+If no clear signal → default to two-pane (sidebar + main, from tui-patterns.md §Two-Pane Layout).
+
 **Compound prompts** (e.g., "refactor this RAG pipeline AND build a TUI for it"):
 Handle the TUI component here. State explicitly:
 "Handling the TUI dashboard component. The RAG pipeline component should be
@@ -42,15 +59,17 @@ Output: recommendation + minimal snippet. No full scaffold unless asked.
 
 ```
 [app_name]/
-├── app.rb                               # Zeitwerk boot + BubbleTea::Program
+├── app.rb                               # Zeitwerk boot + Bubbletea.run
 ├── Gemfile
 └── lib/
     └── [app_name]/
         ├── app.rb                       # Root App model (Model / Update / View)
-        ├── styles.rb                    # All Lipgloss styles as constants
+        ├── styles.rb                    # Semantic color tokens + Lipgloss constants
         ├── screens/
         │   └── main.rb                  # Starter main screen
         └── components/
+            ├── base.rb                  # Adapter: all Bubble API calls go here
+            ├── keyboard.rb              # L0–L3 keyboard layer routing
             └── .keep                    # Stub; domain components added here
 ```
 
@@ -77,12 +96,12 @@ module AppName
         style.render(content)
       end
 
-      def self.join_vertical(*parts)
-        Lipgloss.join_vertical(Lipgloss::Align::LEFT, *parts)
+      def self.join_vertical(*parts, align: :left)
+        Lipgloss.join_vertical(align, *parts)
       end
 
-      def self.join_horizontal(*parts)
-        Lipgloss.join_horizontal(Lipgloss::Align::TOP, *parts)
+      def self.join_horizontal(*parts, align: :top)
+        Lipgloss.join_horizontal(align, *parts)
       end
 
       # Bubbles component wrappers
@@ -185,9 +204,22 @@ needs updating.
 ## BubbleTea Conventions
 
 - State is always `Struct.new(keyword_init: true)` — never instance variables mutated directly
-- Update is a pure function: receives message, returns new state or `BubbleTea::Quit`
+- Update is a pure function: receives message, returns `[self, command]` or `[self, Bubbletea.quit]`
 - View is a pure function: no I/O, no side effects
 - Styles are module-level constants in `styles.rb` — never inline in `view`
+
+## Design System Reference
+
+Load `references/design-patterns.md` for architectural decisions:
+
+- **Section 1** — Layout paradigm anatomy + responsive collapse strategies
+- **Section 2** — Semantic color tokens, `COLORS` hash mapping, NO_COLOR degradation
+- **Section 3** — Four-layer keyboard architecture (L0 Universal → L3 Power)
+- **Section 4** — Three-tier help system (footer always-on / `?` overlay / docs)
+- **Section 5** — Focus management: Tab order, panel dimming, modal focus traps
+- **Section 6** — Command Palette pattern for apps with 20+ actions
+- **Section 7** — Anti-pattern checklist (ranked by frequency)
+- **Section 8** — Compatibility checklist (size, color, terminal, keyboard, Elm purity)
 
 ## Patterns Reference
 
@@ -216,18 +248,18 @@ Load `references/tui-patterns.md` for:
 
 ## Domain → Component Mapping
 
-| Domain | Screens | Key Components |
-| :---- | :---- | :---- |
-| File browser (GDrive etc.) | Browser, Editor, Export | AnimatedFileList (Bubbles::List + Harmonica), PreviewPane (Glamour), StatusBar, ActionMenu |
-| RAG configurator | Config, Ingest, Query, HIL | ConfigForm (Huh::Form), ChunkingOptions, ResultsViewer (Glamour), HilReview |
-| Agent control panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput (Glamour), Intervention (Gum prompts) |
-| Monitoring / metrics | Dashboard | MetricsChart (NTCharts), LogViewer (Glamour), StatusGrid, LoadingSpinner (Bubbles::Spinner) |
-| Data entry forms | Input, Validation, Review | ConfigForm (Huh::Form), FormFields, ValidationPanel |
-| Search/Filter interfaces | Search, Results, Filter | SearchInput (Bubbles::TextInput), FilteredList (Bubbles::List + Harmonica), ResultsPane |
-| Documentation viewer | Reader, Search, TOC | ContentViewer (Glamour), AnimatedNavigation (Bubbles::List + Harmonica), SearchBar |
-| Analytics dashboard | Overview, Charts, Reports | TimeSeriesChart (NTCharts), MetricsPanels, DataTable (Bubbles::List) |
-| Interactive tutorials | Steps, Progress, Navigation | ProgressBar (Harmonica), StepNavigation, ContentDisplay (Glamour) |
-| Live data feeds | Stream, Filters, Controls | SmoothScrolling (Harmonica), DataList (Bubbles::List), FilterControls |
+| Domain | Layout Paradigm | Screens | Key Components |
+| :---- | :---- | :---- | :---- |
+| File browser (GDrive etc.) | Miller Columns | Browser, Editor, Export | AnimatedFileList (Bubbles::List + Harmonica), PreviewPane (Glamour), StatusBar, ActionMenu |
+| RAG configurator | Drill-Down Stack | Config, Ingest, Query, HIL | ConfigForm (Huh::Form), ChunkingOptions, ResultsViewer (Glamour), HilReview |
+| Agent control panel | Persistent Multi-Panel | Dashboard, ToolLog | AgentStatus, ToolCallLog, StreamingOutput (Glamour), Intervention (Gum prompts) |
+| Monitoring / metrics | Widget Dashboard | Dashboard | MetricsChart (NTCharts), LogViewer (Glamour), StatusGrid, LoadingSpinner (Bubbles::Spinner) |
+| Data entry forms | Overlay / Popup | Input, Validation, Review | ConfigForm (Huh::Form), FormFields, ValidationPanel |
+| Search/Filter interfaces | Header + Scrollable List | Search, Results, Filter | SearchInput (Bubbles::TextInput), FilteredList (Bubbles::List + Harmonica), ResultsPane |
+| Documentation viewer | IDE Three-Panel | Reader, Search, TOC | ContentViewer (Glamour), AnimatedNavigation (Bubbles::List + Harmonica), SearchBar |
+| Analytics dashboard | Widget Dashboard | Overview, Charts, Reports | TimeSeriesChart (NTCharts), MetricsPanels, DataTable (Bubbles::List) |
+| Interactive tutorials | Drill-Down Stack | Steps, Progress, Navigation | ProgressBar (Harmonica), StepNavigation, ContentDisplay (Glamour) |
+| Live data feeds | Header + Scrollable List | Stream, Filters, Controls | SmoothScrolling (Harmonica), DataList (Bubbles::List), FilterControls |
 
 ## Output Format
 

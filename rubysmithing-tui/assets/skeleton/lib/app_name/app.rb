@@ -22,7 +22,7 @@ module AppName
     def update(message)
       case message
       in :quit
-        BubbleTea::Quit
+        [self, Bubbletea.quit]
       in { switch_screen: Symbol => screen }
         @state = @state.with(active_screen: screen)
       in { status: String => msg }
@@ -35,7 +35,7 @@ module AppName
     # ── View ──────────────────────────────────────────────────────────────
     def view
       Lipgloss.join_vertical(
-        Lipgloss::Align::LEFT,
+        :left,
         header_view,
         active_screen&.view || "",
         status_bar_view

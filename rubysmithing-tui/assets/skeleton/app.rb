@@ -11,6 +11,4 @@ loader = Zeitwerk::Loader.new
 loader.push_dir("#{__dir__}/lib")
 loader.setup
 
-# Verify BubbleTea::Program API via rubysmithing-context before use
-program = BubbleTea::Program.new(AppName::App.new)
-program.run
+Bubbletea.run(AppName::App.new)
