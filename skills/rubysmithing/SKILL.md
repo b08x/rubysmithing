@@ -10,19 +10,23 @@ color: red
 Convention-aware Ruby code generator. Generates complete, idiomatic Ruby files
 calibrated to project-detected conventions and task scope.
 
-## Companion Skills
+## Agent Delegation Pattern
 
-Each operates independently. Load them when the task clearly falls in their domain:
+This skill acts as the hub and delegates to specialized sub-agents for complex tasks.
+When a task falls outside this skill's scope, use the corresponding agent:
 
-| Skill | Domain |
-| :---- | :---- |
-| `rubysmithing-context` | Gem API verification via Context7 before any library code |
-| `rubysmithing-genai` | LLM chat, agents, RAG, embeddings, DSPy, MCP, NLP |
-| `rubysmithing-tui` | BubbleTea apps, Lipgloss layouts, Huh forms, TUI components |
-| `rubysmithing-refactor` | Convention fixes, anti-pattern removal, Zeitwerk compliance |
-| `rubysmithing-report` | SIFT QA audit, design review, tech advisory |
-| `rubysmithing-yardoc` | YARD documentation generation with semantic type inference |
-| `rubysmithing-scaffold` | Project initialization via rubysmith or gemsmith CLI |
+| Task Type | Agent | When to Delegate |
+|:----------|:------|:-----------------|
+| Gem API verification | `rubysmithing-context` | Before generating code using non-stdlib gems |
+| Project scaffolding | `rubysmithing-scaffold` | New project initialization (rubysmith/gemsmith) |
+| LLM/AI/NLP code | `rubysmithing-genai` | Chatbots, RAG, embeddings, DSPy, MCP servers |
+| TUI interfaces | `rubysmithing-tui` | BubbleTea, Lipgloss, Huh, Gum, Bubbles |
+| Refactoring | `rubysmithing-refactor` | Convention fixes, Zeitwerk compliance |
+| QA assessment | `rubysmithing-report` | SIFT audits, design reviews |
+| YARD docs | `rubysmithing-yardoc` | Documentation generation |
+
+**Delegation pattern**: When delegating, invoke the agent using the Task tool
+with the appropriate agent name from `$CLAUDE_PLUGIN_ROOT/agents/`.
 
 ## Step 1: Detect Mode
 
