@@ -4,20 +4,70 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Ruby Agent Skills v1.0 is a modular, convention-aware skill suite for Ruby development with AI assistance. It uses a hub-and-spoke architecture where the central `rubysmithing` skill routes requests to specialized sub-skills.
+Rubysmithing v1.0 is a Claude Code plugin providing a convention-aware Ruby development suite. It uses an orchestrator/sub-agent architecture backed by a hub-and-spoke skill system. The plugin manifest lives at `.claude-plugin/plugin.json`.
+
+## Plugin Layout
+
+```
+.claude-plugin/plugin.json   # Plugin manifest
+agents/                      # Orchestrator + 8 domain sub-agents
+commands/                    # 5 user-invocable slash commands
+hooks/                       # Convention enforcement hooks
+  hooks.json                 # PostToolUse(.rb) + Stop hooks
+  scripts/                   # check-ruby-conventions.sh
+skills/                      # 8 auto-discovering skill definitions
+  rubysmithing/              # Hub: POROs, Rake, config, pipelines
+  rubysmithing-context/      # Gem API verification (Context7 + SQLite)
+  rubysmithing-scaffold/     # rubysmith / gemsmith project init
+  rubysmithing-genai/        # LLM, RAG, DSPy, MCP, embeddings
+  rubysmithing-tui/          # Charm/Bubble TUI scaffolder
+  rubysmithing-refactor/     # Convention-targeted refactoring
+  rubysmithing-report/       # SIFT Protocol V1.0 QA assessment
+  rubysmithing-yardoc/       # YARD docs with type inference
+```
 
 ## No Build System
 
-This repository contains skill definitions, not executable code. There are no tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The one executable artifact is:
+This repository contains skill and agent definitions, not executable code. No tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The one executable artifact is:
 
 ```bash
-ruby rubysmithing-context/scripts/context_cache.rb list       # cached gems + staleness
-ruby rubysmithing-context/scripts/context_cache.rb check <gem>  # fresh fetch (TTL-aware)
-ruby rubysmithing-context/scripts/context_cache.rb stale <gem>  # stale fetch + warning block
-ruby rubysmithing-context/scripts/context_cache.rb evict <gem>  # force re-resolution
+ruby skills/rubysmithing-context/scripts/context_cache.rb list       # cached gems + staleness
+ruby skills/rubysmithing-context/scripts/context_cache.rb check <gem>  # fresh fetch (TTL-aware)
+ruby skills/rubysmithing-context/scripts/context_cache.rb stale <gem>  # stale fetch + warning block
+ruby skills/rubysmithing-context/scripts/context_cache.rb evict <gem>  # force re-resolution
 ```
 
+## Orchestrator / Sub-Agent Architecture
+
+The plugin uses a thin routing orchestrator (`agents/rubysmithing-orchestrator.md`) that delegates to domain sub-agents. Each sub-agent loads its corresponding SKILL.md as its primary reference.
+
+| Agent | Role |
+|:---|:---|
+| **rubysmithing-orchestrator** | Thin router: convention detection + delegates to domain agents |
+| **rubysmithing-context** | Prerequisite: gem API verification via Context7 + SQLite cache |
+| **rubysmithing-main** | POROs, Rake tasks, config wiring, data pipelines |
+| **rubysmithing-scaffold** | Project initialization via rubysmith / gemsmith CLI |
+| **rubysmithing-genai** | LLM, RAG, DSPy, MCP servers, embeddings, NLP |
+| **rubysmithing-tui** | Charm/Bubble TUI scaffolding |
+| **rubysmithing-refactor** | Convention-targeted refactoring + Pre-Refactor Audit |
+| **rubysmithing-report** | SIFT Protocol V1.0 QA assessment |
+| **rubysmithing-yardoc** | YARD docs with semantic AST analysis and type inference |
+
+**Routing order:** orchestrator → rubysmithing-context (if gems) → domain agent → (optional) rubysmithing-report
+
+## Slash Commands
+
+| Command | Purpose |
+|:---|:---|
+| `/rubysmithing:context <gem>` | Check/warm the gem API cache |
+| `/rubysmithing:report [path]` | Run SIFT QA assessment |
+| `/rubysmithing:scaffold [name]` | Initialize new Ruby project |
+| `/rubysmithing:refactor <file>` | Audit and refactor a file |
+| `/rubysmithing:yardoc <file>` | Generate YARD documentation |
+
 ## Hub-and-Spoke Skill Architecture
+
+Skills auto-activate on trigger phrases. Each skill is paired with a corresponding agent for autonomous multi-step execution.
 
 | Skill | Role |
 |:---|:---|

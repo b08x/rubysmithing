@@ -1,29 +1,47 @@
-# Ruby Agent Skills v1.0
+# Rubysmithing
 
-A modular, convention-aware skill suite for Ruby development with AI assistance. Code generation, refactoring, quality assessment, terminal UI building, and GenAI orchestration... all orchestrated through a hub-and-spoke model.
+Convention-aware Ruby development plugin for Claude Code. Provides an orchestrated agent suite, auto-activating skills, convention enforcement hooks, and slash commands — all backed by a hub-and-spoke architecture.
 
-## Architecture
+## Prerequisites
+
+- **Context7 MCP** must be configured in your Claude Code environment. The `rubysmithing-context` skill and agent use it for live gem API resolution. Without it, the tiered degradation protocol (stale SQLite cache → WARNING blocks) activates automatically.
+
+  Add to your Claude Code MCP settings:
+  ```json
+  { "context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] } }
+  ```
+
+- **jq** must be installed for the PostToolUse convention hook (`apt install jq` / `brew install jq`). The hook degrades gracefully (no-op) if absent.
+
+## Plugin Layout
 
 ```text
-/
-├── rubysmithing/              # Hub: routes tasks, handles simple Ruby gen
-│   ├── SKILL.md
-│   └── references/
-│       ├── conventions.md          # Core Ruby/Stack idioms
-│       └── convention-detection.md # Single source of truth for convention cascade
-├── rubysmithing-context/      # Gem API verification (Context7)
-│   ├── SKILL.md
-│   ├── scripts/
-│   │   └── context_cache.rb   # Persistent gem resolution + stale-cache fallback
-│   └── references/
-│       └── gem-registry.md    # Context7 IDs + last_verified dates
-├── rubysmithing-genai/        # AI/NLP scaffolding & patterns
-├── rubysmithing-refactor/     # Targeted convention fixes
-├── rubysmithing-report/       # SIFT Protocol V1.0 QA assessments
-├── rubysmithing-tui/          # Terminal UI building with adapter pattern
-│   └── assets/skeleton/       # Standardized TUI project structure
-└── rubysmithing-yardoc/       # YARD documentation generation with semantic analysis
+.claude-plugin/plugin.json     # Plugin manifest
+agents/                        # 1 orchestrator + 8 domain sub-agents
+commands/                      # 5 slash commands (/rubysmithing:*)
+hooks/
+  hooks.json                   # PostToolUse(Write|Edit .rb) + Stop hooks
+  scripts/check-ruby-conventions.sh
+skills/
+  rubysmithing/                # Hub: POROs, Rake, config, pipelines
+  rubysmithing-context/        # Gem API verification (Context7 + SQLite)
+  rubysmithing-scaffold/       # rubysmith / gemsmith project init
+  rubysmithing-genai/          # LLM, RAG, DSPy, MCP, embeddings
+  rubysmithing-tui/            # Charm/Bubble TUI scaffolder
+  rubysmithing-refactor/       # Convention-targeted refactoring
+  rubysmithing-report/         # SIFT Protocol V1.0 QA assessment
+  rubysmithing-yardoc/         # YARD docs with type inference
 ```
+
+## Slash Commands
+
+| Command | Purpose |
+|:--------|:--------|
+| `/rubysmithing:context <gem>` | Check or warm the gem API cache |
+| `/rubysmithing:report [path]` | Run SIFT QA assessment |
+| `/rubysmithing:scaffold [name]` | Initialize new Ruby project |
+| `/rubysmithing:refactor <file>` | Audit and refactor a file |
+| `/rubysmithing:yardoc <file>` | Generate YARD documentation |
 
 ## Execution Modes
 
@@ -58,10 +76,10 @@ Resolves live gem documentation via Context7. Fails loudly—never silently. Deg
 **Cache CLI:**
 
 ```bash
-ruby scripts/context_cache.rb list              # all cached gems + staleness status
-ruby scripts/context_cache.rb check <gem>       # fresh fetch (respects TTL)
-ruby scripts/context_cache.rb stale <gem>       # stale fetch + warning block
-ruby scripts/context_cache.rb evict <gem>       # force re-resolution next use
+ruby skills/rubysmithing-context/scripts/context_cache.rb list              # all cached gems + staleness status
+ruby skills/rubysmithing-context/scripts/context_cache.rb check <gem>       # fresh fetch (respects TTL)
+ruby skills/rubysmithing-context/scripts/context_cache.rb stale <gem>       # stale fetch + warning block
+ruby skills/rubysmithing-context/scripts/context_cache.rb evict <gem>       # force re-resolution next use
 ```
 
 ### rubysmithing-report

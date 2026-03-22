@@ -47,7 +47,7 @@ If cached → use cached result directly, skip Steps 2–4.
 Before calling Context7, check `~/.rubysmithing/context_cache.db`:
 
 ```bash
-result=$(ruby rubysmithing-context/scripts/context_cache.rb fetch GEMNAME --json)
+result=$(ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/scripts/context_cache.rb fetch GEMNAME --json)
 # {"status":"fresh",...} → use cached entry, add to session cache, skip Steps 3–4
 # {"status":"miss"}      → proceed to Step 3
 ```
@@ -87,7 +87,7 @@ deprecation warnings or breaking changes noted in docs.
 Store the resolved result in both session cache and SQLite persistent cache:
 
 ```bash
-ruby rubysmithing-context/scripts/context_cache.rb store GEMNAME CONTEXT7_ID \
+ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/scripts/context_cache.rb store GEMNAME CONTEXT7_ID \
   '[".method_one(arg:)", ".method_two"]' \
   'GemClass.new.call'
 ```
@@ -112,7 +112,7 @@ apply the following tiered degradation — do not block code generation.
 ### Tier 1 — Stale SQLite Cache (preferred fallback)
 
 ```bash
-result=$(ruby rubysmithing-context/scripts/context_cache.rb stale GEMNAME --json)
+result=$(ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-context/scripts/context_cache.rb stale GEMNAME --json)
 # Exit 0 = fresh  → use result normally
 # Exit 2 = stale  → use result, inject result["warning"] block above generated code,
 #                   flag every method call with # stale-cache
