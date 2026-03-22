@@ -2,6 +2,7 @@
 name: rubysmithing-yardoc
 requires: [rubysmithing-context]
 description: YARD documentation generator with semantic analysis for Ruby files. Automatically activates on requests to generate, add, or improve YARD documentation. Uses AST parsing and type inference to generate comprehensive @param, @return, @example, and @raise tags. Maintains consistency with existing project documentation patterns and YARD configuration. Generates production-grade documentation that eliminates usage pitfalls and accelerates correct method implementation. Requires rubysmithing-context when the target file uses non-stdlib gems, to ensure type annotations reflect verified API shapes.
+color: red
 ---
 
 # Rubysmithing — YARD Documentation Generator
@@ -11,6 +12,7 @@ Semantic analysis-powered YARD documentation generator. Transforms Ruby code int
 ## When This Skill Activates
 
 Activate on any mention of:
+
 - "generate YARD documentation", "add YARD comments", "document this code"
 - "yardoc", "yard", "@param", "@return", "@example"
 - "document methods", "generate docs", "add documentation"
@@ -39,11 +41,13 @@ Skip this step for: stdlib-only files, Lite Mode tasks, gems already resolved th
 ## Step 1: Validate Target and Context
 
 ### Target File Validation
+
 - Verify specified Ruby file exists and is readable
 - Confirm `.rb` extension (warn if missing but proceed)
 - Parse file for basic syntax validity before analysis
 
 ### Documentation Context Assessment
+
 - Check for `.yardopts` file to maintain project YARD configuration
 - Scan existing codebase for established documentation patterns
 - Identify documentation coverage gaps and consistency issues
@@ -52,7 +56,9 @@ Skip this step for: stdlib-only files, Lite Mode tasks, gems already resolved th
 ## Step 2: Semantic Code Analysis
 
 ### AST-Based Structure Parsing
+
 Use Ruby parser to extract:
+
 - Class and module hierarchies with inheritance chains
 - Method signatures including parameter types and defaults
 - Instance vs class method distinction
@@ -60,7 +66,9 @@ Use Ruby parser to extract:
 - Block parameter usage patterns and yields
 
 ### Type Inference Engine
+
 Analyze code implementation to infer:
+
 - Parameter types from usage patterns and method calls
 - Return value types from conditional branches and explicit returns
 - Nilable returns from conditional logic and early returns
@@ -68,7 +76,9 @@ Analyze code implementation to infer:
 - Exception conditions from raise statements and rescue blocks
 
 ### Behavioral Pattern Recognition
+
 Extract method purpose from:
+
 - Implementation logic and control flow
 - Parameter interactions and transformation patterns
 - Side effects and state mutations
@@ -77,6 +87,7 @@ Extract method purpose from:
 ## Step 3: YARD Documentation Generation
 
 ### Method Documentation Assembly
+
 Generate complete YARD comment blocks with:
 
 ```ruby
@@ -101,6 +112,7 @@ Generate complete YARD comment blocks with:
 ```
 
 ### Type Annotation Precision
+
 - Use specific Ruby types: `String`, `Integer`, `Hash{Symbol => Object}`
 - Document complex structures: `Array<Hash{String => Symbol}>`
 - Include duck typing: `#to_s`, `#each`, `#call`
@@ -108,7 +120,9 @@ Generate complete YARD comment blocks with:
 - Document union types: `String, Symbol` for flexible parameters
 
 ### Example Generation Strategy
+
 Create realistic, working code examples:
+
 - Use actual parameter values that demonstrate typical usage
 - Show return value structure with comments
 - Include both simple and complex usage scenarios
@@ -118,6 +132,7 @@ Create realistic, working code examples:
 ## Step 4: Documentation Quality Assurance
 
 ### Validation Checklist
+
 - **Type Accuracy**: Verify type annotations match actual code behavior
 - **Example Validation**: Ensure all examples are syntactically correct and realistic
 - **Completeness**: Check all method parameters and return scenarios are documented
@@ -125,6 +140,7 @@ Create realistic, working code examples:
 - **YARD Compliance**: Validate generated syntax against YARD standards
 
 ### Integration Verification
+
 - Preserve existing comment structure and formatting
 - Maintain project-specific documentation conventions
 - Ensure generated documentation integrates cleanly with existing docs
@@ -133,13 +149,16 @@ Create realistic, working code examples:
 ## Step 5: Output and Application
 
 ### Documentation Insertion
+
 - Insert generated YARD comments at appropriate code locations
 - Preserve existing code structure and indentation
 - Maintain proper spacing between methods and comment blocks
 - Handle edge cases like nested classes and metaprogramming
 
 ### Quality Report Summary
+
 Provide completion summary:
+
 - Number of methods documented
 - Types of documentation generated (params, returns, examples, etc.)
 - Any limitations or unresolved patterns encountered
@@ -148,12 +167,14 @@ Provide completion summary:
 ## Advanced Features
 
 ### Project Pattern Learning
+
 - Detect and follow established parameter naming conventions
 - Match existing documentation verbosity and style preferences
 - Inherit project-specific type annotation patterns
 - Respect existing @since, @deprecated, and custom tag usage
 
 ### Error Handling Protocol
+
 - If file parsing fails: Report specific syntax issues and suggest fixes
 - If type inference is uncertain: Use conservative types with explicit uncertainty notes
 - If YARD syntax validation fails: Provide corrected syntax with explanations

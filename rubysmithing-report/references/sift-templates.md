@@ -62,6 +62,70 @@ and citation style.*
 
 ---
 
+## [hotkey="backlog"]
+
+### Instructions for Backlog Generation
+
+Create a project backlog **based on the System Design Review findings**. If a system design
+review was not already produced in this session, **first generate one** using the
+`[hotkey="system design review"]` template, then extract backlog items from it.
+
+You must generate **two markdown files** in the project folder:
+- `.backlog/stories.md`
+- `.backlog/tasks.md`
+
+Use the exact file headings and formats below. Ensure each task references a story ID.
+
+**Format requirements:**
+- Stories must follow the user story template: `As a [role], I want [capability], so that [benefit].`
+- Each story includes acceptance criteria bullets.
+- Tasks must be granular, implementation-ready, and mapped to a story ID.
+- Use consistent IDs: `US-001`, `US-002`, ... and `T-001`, `T-002`, ...
+- If a story depends on another, note it in a `Dependencies:` line.
+
+**Output format (exactly):**
+```
+FILE: .backlog/stories.md
+
+# Backlog — User Stories
+
+## US-001 — [Short title]
+As a [role], I want [capability], so that [benefit].
+Acceptance Criteria:
+* ...
+* ...
+Dependencies: [US-### or None]
+
+## US-002 — [Short title]
+As a [role], I want [capability], so that [benefit].
+Acceptance Criteria:
+* ...
+* ...
+Dependencies: [US-### or None]
+```
+
+```
+FILE: .backlog/tasks.md
+
+# Backlog — Tasks
+
+## T-001 — [Short title]
+Story: US-001
+Details:
+* ...
+* ...
+
+## T-002 — [Short title]
+Story: US-002
+Details:
+* ...
+* ...
+```
+
+*Maintain strict adherence to this format and file labeling.*
+
+---
+
 ## [hotkey="tech advisory"]
 
 ### Instructions for Tech Advisory

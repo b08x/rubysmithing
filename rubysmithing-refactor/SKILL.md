@@ -1,6 +1,7 @@
 ---
 name: rubysmithing-refactor
 description: Convention-targeted Ruby refactoring sub-skill. Activates on any mention of: refactor, clean up, fix conventions, this code is messy, help me improve this, anti-patterns, rubocop violations, Zeitwerk compliance, autoload issue, make this idiomatic, extend self, frozen string literal missing, thread usage, hardcoded config, silent rescue, or missing namespace. Accepts pasted code snippets, uploaded files, or filesystem paths. Detects convention target from project config (RuboCop, StandardRB, Rubysmith) before applying changes. Produces pre-refactor audit + complete refactored file + change log. Applies Lite Mode bypass for scripts under ~50 lines where architectural mandates would be disproportionate.
+color: red
 ---
 
 # Rubysmithing — Refactor
@@ -22,6 +23,7 @@ Handle the refactoring component here. State:
 ## Step 1: Detect Convention Target
 
 Priority order:
+
 1. `.rubocop.yml` → RuboCop (parse enabled cops, target Ruby version)
 2. `standard` in Gemfile → StandardRB
 3. `.rubysmith` / `rubysmith` gem → Rubysmith defaults
@@ -30,15 +32,18 @@ Priority order:
 ## Step 2: Detect Mode
 
 ### Lite Mode
+
 Apply when: file is ≤ ~50 lines, or request is clearly a simple utility script.
 
 Lite Mode refactor scope:
+
 - Style fixes only (frozen string literal, indent, naming, guard clauses)
 - Do NOT add async, circuit breakers, or dry-schema
 - Do NOT mandate journald-logger for a one-off script
 - Note: "Lite Mode applied — architectural mandates omitted (disproportionate for scope)"
 
 ### Standard Mode
+
 Apply for all other inputs. Full pattern catalog from `references/refactor-patterns.md`.
 
 ## Step 3: Pre-Refactor Audit
@@ -65,6 +70,7 @@ Pattern names in brackets map to `references/refactor-patterns.md`.
 ## Step 4: Refactor
 
 Apply changes. For each non-trivial transformation:
+
 - Show before/after inline for any change that alters behavior
 - Add inline comment if refactored pattern is non-obvious
 - Flag explicitly if a change alters observable behavior
@@ -72,6 +78,7 @@ Apply changes. For each non-trivial transformation:
 ## Step 5: Verify Zeitwerk Compliance
 
 Confirm post-refactor:
+
 - Module/class name matches file path exactly
 - No `require` for Zeitwerk-managed files
 - `loader.collapse` / `loader.push_dir` used correctly for non-standard paths

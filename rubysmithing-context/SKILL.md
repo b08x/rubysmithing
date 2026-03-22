@@ -2,6 +2,7 @@
 name: rubysmithing-context
 requires: []
 description: Gem API verification sub-skill for Ruby development. Automatically activates on first mention of any Ruby gem — especially ruby_llm, sequel, async, bubbletea, dspy.rb, pgvector, huh, dry-schema, circuit_breaker, fast-mcp, or informers — and resolves current method signatures and usage examples via Context7 MCP before code is generated. Results are cached for the session and persisted to SQLite across sessions. If Context7 resolution fails or is rate-limited, falls back to the tiered degradation protocol (stale cache → gem-registry ID → WARNING block) rather than silently guessing. Pairs with rubysmithing, rubysmithing-genai, and rubysmithing-tui as a prerequisite step.
+color: red
 ---
 
 # Rubysmithing — Context

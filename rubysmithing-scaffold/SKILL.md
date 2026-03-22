@@ -14,6 +14,7 @@ description: Ruby project scaffolder using rubysmith (apps, tools, scripts) or g
   rubysmithing-genai, rubysmithing-yardoc, and rubysmithing-context as appropriate.
   Use this skill whenever a user wants to start a new Ruby project from scratch —
   even if they haven't said "scaffold" explicitly.
+color: red
 ---
 
 # Rubysmithing — Scaffold
@@ -92,6 +93,7 @@ gemsmith build --name <name> [flags]
 ```
 
 **On non-zero exit:** show the error verbatim. Diagnose the common causes:
+
 - Missing config → run `rubysmith --edit` or `gemsmith --edit`
 - Name collision → directory already exists; choose a different name or remove it
 - Tool not installed → `gem install rubysmith` or `gem install gemsmith`
@@ -156,6 +158,7 @@ Next steps — route to these skills as needed:
 ```
 
 **Adaptive suppression rules:**
+
 - `--cli` was passed to gemsmith → suppress `rubysmithing-tui` suggestion
 - Project name contains "llm", "rag", "ai", "gpt", "chat", "embed" → promote `rubysmithing-genai` to top
 - Convention pass was applied → remove `rubysmithing-refactor` from list

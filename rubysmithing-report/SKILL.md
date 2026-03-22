@@ -1,6 +1,7 @@
 ---
 name: rubysmithing-report
 description: Rubysmith QA assessment sub-skill implementing the SIFT Protocol V1.0. Activates on any mention of: assess, audit, review this project, code quality, convention violations, what's wrong with this code, score my code, how compliant is this, system design review, tech advisory, SIFT, Rubysmith QA, Caliber, Reek, dry-monads compliance, pipeline depth, god class, missing DI, or any request for a structured code quality report. Accepts pasted code, uploaded files, or filesystem paths. Produces an 8-section SIFT report from the Rubysmith Pragmatist persona. Supports two focused modes: "system design review" (structured architectural deep-dive) and "tech advisory" (700-character critical advisory with links).
+color: red
 ---
 
 # Rubysmithing — Report
@@ -28,18 +29,28 @@ persona and all formatting rules before producing any output.
 ## Step 2: Detect Mode
 
 ### Default — Full SIFT Report
+
 Triggered by: assess, audit, review, report, what's wrong, code quality, convention
 violations, score my code, or a general code paste.
 
 Execute the 8-section SIFT output format from `references/sift-protocol.md`.
 
 ### System Design Review
+
 Triggered by: "system design review", "architecture review", "review this design",
 or `[hotkey="system design review"]`.
 
 Use the structured review template from `references/sift-templates.md`.
 
+### Backlog
+
+Triggered by: "backlog", "generate backlog", "create backlog",
+or `[hotkey="backlog"]`.
+
+Generate backlog artifacts using the template in `references/sift-templates.md`.
+
 ### Tech Advisory
+
 Triggered by: "tech advisory", "quick advisory", "critical issues only",
 or `[hotkey="tech advisory"]`.
 
@@ -48,6 +59,7 @@ Condensed review → 700-character advisory + 2–5 bare links. Critical issues 
 ## Step 3: Detect Convention Target
 
 Same detection order as all other sub-skills:
+
 1. `.rubocop.yml` → RuboCop
 2. `standard` in Gemfile → StandardRB
 3. `.rubysmith` / `rubysmith` gem → Rubysmith defaults

@@ -2,6 +2,7 @@
 name: rubysmithing-tui
 requires: [rubysmithing-context]
 description: Terminal UI scaffolder and advisor for Ruby projects using the Charm/Bubble ecosystem. Activates on any mention of: TUI, terminal UI, terminal interface, terminal app, BubbleTea, bubbletea, Lipgloss, lipgloss, Bubbles, bubbles (UI components), Huh, huh form, form validation, Gum, gum prompts, NTCharts, charts, data visualization, Bubblezone, Glamour, glamour rendering, markdown display, Harmonica, harmonica animations, spring physics, smooth transitions, animated scrolling, file browser, file picker, directory browser, interactive terminal, multi-panel, split pane, sidebar, dashboard, control panel, monitor, keyboard navigation, cursor movement, human in the loop component, HIL interface, RAG viewer, agent control panel, streaming output panel, text input, spinner, list selection, metrics display, animated transitions, or progress bar within a terminal context. Always runs rubysmithing-context as prerequisite for Bubble gem API verification. Always produces full skeleton: app.rb + screens/ + components/ stubs. Specs only on explicit request.
+color: red
 ---
 
 # Rubysmithing — TUI
@@ -246,6 +247,7 @@ Verified Context7 IDs (pre-mapped — no resolution calls needed):
 | bubblezone | `/marcoroth/bubblezone-ruby` |
 
 Key verified patterns:
+
 - **Entry:** `Bubbletea.run(App.new)` — NOT `BubbleTea::Program.new`
 - **Quit:** `Bubbletea.quit` — NOT `BubbleTea::Quit`
 - **Colors:** `.foreground("#HEX")` — NO `Lipgloss::Color.new` wrapper
@@ -270,6 +272,7 @@ Key verified patterns:
 ## Output Format
 
 For scaffolds:
+
 1. **Full file tree** — every file to be created
 2. **Complete content** for each file — screens/components left as minimal stubs only if
    they require domain-specific data flows not yet defined
@@ -278,6 +281,7 @@ For scaffolds:
 5. **Context7 IDs used** — or WARNING blocks if resolution failed
 
 For advisory:
+
 1. **Direct recommendation** with gem/component rationale
 2. **Minimal snippet** for the specific pattern
 3. **No full scaffold** unless asked
@@ -285,6 +289,7 @@ For advisory:
 ## Specs
 
 Generate RSpec specs only when explicitly requested:
+
 - Test Update function (pure, testable without rendering)
 - Focus on state transitions, not view output
 - File: `spec/[path]_spec.rb`

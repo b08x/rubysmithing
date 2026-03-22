@@ -1,6 +1,7 @@
 ---
 name: rubysmithing-genai
 description: AI/NLP component scaffolder and advisor for Ruby projects. Activates on any mention of: LLM chat, chatbot, agent, tool-calling, function calling, streaming, RAG, retrieval augmented generation, vector search, semantic search, embedding, pgvector, DSPy, reasoning module, chain of thought, ReAct, MCP server, MCP tool, model context protocol, ruby_llm, RubyLLM, NLP, entity extraction, named entity recognition, sentence segmentation, chunking, document processing, local inference, informers, spaCy, ruby-spacy, prompt pipeline, or structured output. Detects whether request is scaffolding (generate file) or advisory (explain approach). Always runs rubysmithing-context as a prerequisite step before generating any library-specific code. Single focused file output; specs only on explicit request.
+color: red
 ---
 
 # Rubysmithing — GenAI
@@ -60,6 +61,7 @@ embedding generator (remote vs local), NLP processor, async+circuit breaker wrap
 ## Specs
 
 Generate RSpec specs only when explicitly requested:
+
 - Stub external LLM calls with VCR or manual doubles
 - Test reasoning logic, not API response content
 - File: `spec/[path_matching_lib_file]_spec.rb`

@@ -2,6 +2,7 @@
 name: rubysmithing
 requires: []
 description: Convention-aware Ruby code generator for the terminal-native AI orchestration stack (dotenv, tty-config, zeitwerk, async, dry-schema, sequel, journald-logger, circuit_breaker, parallel, concurrent-ruby). Use for generating Ruby classes, modules, Rake tasks, config wiring, boot layer code, data pipelines, POROs, error class hierarchies, parallel processing workers, content parsers, and Gemfile decisions. Applies project-detected conventions (RuboCop, StandardRB, or community idioms) automatically. For single-file output under ~50 lines or pure stdlib work, activates Lite Mode — no dry-schema, no async, no circuit breakers. Multi-file scaffold requests always use Standard Mode regardless of per-file line count. Does NOT handle: LLM/AI/NLP code (rubysmithing-genai), TUI interfaces (rubysmithing-tui), refactoring (rubysmithing-refactor), quality reports (rubysmithing-report), or YARD documentation (rubysmithing-yardoc). Always defers to rubysmithing-context for gem API verification before generating library-specific code.
+color: red
 ---
 
 # Rubysmithing
