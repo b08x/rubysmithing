@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Convention-aware Ruby development suite. Hub-and-spoke skill system with orchestrated agents for code generation, TUI scaffolding, AI/NLP components, refactoring, QA assessment, and YARD documentation.",
   "author": {
-    "name": "b08x"
+    "name": "Robert Pannick"
   },
   "keywords": [
     "ruby",
@@ -13,13 +13,18 @@
     "refactoring",
     "yardoc",
     "zeitwerk",
-    "rubysmithing"
+    "rubysmithing",
+    "kaizen",
+    "analyse",
+    "root-cause",
+    "muda"
   ],
   "skills": [
     "./skills/",
     "./commands/"
   ],
   "agents": [
+    "./agents/rubysmithing-analyse.md",
     "./agents/rubysmithing-context.md",
     "./agents/rubysmithing-genai.md",
     "./agents/rubysmithing-main.md",

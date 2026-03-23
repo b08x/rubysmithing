@@ -78,3 +78,12 @@ offer a numbered list of potential analysis tasks before proceeding.
 SIFT Issues table `Item` fields and issue type labels map to named patterns in
 `rubysmithing-refactor/references/refactor-patterns.md`.
 When suggesting fixes, reference the pattern name where one exists.
+
+## Integration with rubysmithing-analyse
+
+When SIFT findings include recurring patterns or non-obvious root causes,
+suggest `/rubysmithing:analyse` for causal follow-up. Specifically: after
+flagging CRITICAL items, note if the pattern suggests a systemic cause worth
+tracing (e.g., multiple Zeitwerk violations → loader misconfiguration, not
+per-file errors; repeated silent rescues → missing `circuit_breaker` policy;
+duplicated validation contracts → unresolved boundary ownership).

@@ -13,8 +13,8 @@
       "description": "Convention-aware Ruby development suite with hub-and-spoke architecture. Provides 8 specialized agents: orchestrator (routing), context (gem API verification via Context7), main (POROs, Rake, config), scaffold (rubysmith/gemsmith project init), genai (LLM, RAG, DSPy, MCP), tui (BubbleTea, Lipgloss, Huh, Gum), refactor (convention-targeted rewriting), report (SIFT Protocol QA), and yardoc (YARD docs with type inference). Supports Lite Mode for stdlib-only scripts and Standard Mode for production code with async, circuit_breaker, and Zeitwerk compliance.",
       "version": "1.0.0",
       "author": {
-        "name": "b08x",
-        "email": "b08x@users.noreply.github.com"
+        "name": "Robert Pannick",
+        "email": "rwpannick@gmail.com"
       },
       "source": "./",
       "category": "development"
