@@ -12,6 +12,15 @@ LLM/chatbot requests go to this agent. It mandates rubysmithing-context before g
 </example>
 
 <example>
+Context: User wants an Agent with Tool classes
+user: "Create a RubyLLM::Agent with custom RubyLLM::Tool subclasses for weather and search"
+assistant: "Using rubysmithing-genai — verifying RubyLLM Agent and Tool class APIs via context."
+<commentary>
+RubyLLM::Agent and RubyLLM::Tool class-based patterns route here. Context7 verifies the current API shape for agent configuration, tool parameters, and callbacks.
+</commentary>
+</example>
+
+<example>
 Context: User wants a RAG pipeline
 user: "Create a RAG ingestion pipeline with pgvector similarity search"
 assistant: "Using rubysmithing-genai to scaffold the RAG pipeline — verifying pgvector and sequel APIs first."

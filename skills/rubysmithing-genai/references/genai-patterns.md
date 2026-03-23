@@ -40,6 +40,205 @@ response = chat.ask("Search for recent AI papers")
 
 ---
 
+## RubyLLM Agent & Tool Classes
+
+Class-based patterns for building structured agents and reusable tools.
+All syntax verified via Context7 (`/crmne/ruby_llm`).
+
+### Basic Tool Class
+
+```ruby
+# frozen_string_literal: true
+
+# A tool is a Ruby class inheriting from RubyLLM::Tool.
+# description → what the tool does (shown to the model)
+# param → declares an argument with optional type, desc, required
+# execute → the method the model calls; must accept keyword args
+
+class Weather < RubyLLM::Tool
+  description "Gets current weather for a location"
+  param :city, desc: "City name"
+  param :units, type: :string, desc: "celsius or fahrenheit", required: false
+
+  def execute(city:, units: "celsius")
+    response = Faraday.get("https://api.weather.com/#{city}&units=#{units}")
+    JSON.parse(response.body)
+  rescue => e
+    { error: e.message }
+  end
+end
+
+# Attach to a chat instance
+chat = RubyLLM.chat(model: "gpt-4o")
+chat.with_tool(Weather)
+response = chat.ask("What's the weather in Tokyo?")
+```
+
+### Tool with Typed Parameters
+
+```ruby
+class Calculator < RubyLLM::Tool
+  description "Performs basic arithmetic"
+  param :expression, desc: "Mathematical expression to evaluate"
+
+  def execute(expression:)
+    { result: eval(expression) }
+  end
+end
+```
+
+### Tool with Dependencies (initialize)
+
+```ruby
+class DocumentSearch < RubyLLM::Tool
+  description "Searches documents by relevance"
+  param :query, desc: "The search query"
+  param :limit, type: :integer, desc: "Maximum number of results", required: false
+
+  def initialize(database)
+    @database = database
+  end
+
+  def execute(query:, limit: 5)
+    @database.search(query, limit: limit)
+  end
+end
+
+# Pass dependencies at instantiation
+search_tool = DocumentSearch.new(MyDatabase)
+chat.with_tool(search_tool)
+```
+
+### Tool Call Callbacks
+
+```ruby
+chat = RubyLLM.chat(model: "gpt-4o")
+  .with_tool(Weather)
+  .on_tool_call do |tool_call|
+    logger.info("Tool invoked", name: tool_call.name, args: tool_call.arguments)
+  end
+  .on_tool_result do |result|
+    logger.info("Tool returned", result: result)
+  end
+
+response = chat.ask("What's the weather in Paris?")
+```
+
+### Streaming with Tools
+
+```ruby
+chat = RubyLLM.chat(model: "gpt-4o").with_tool(Weather)
+
+chat.ask("What's the weather in Berlin?") do |chunk|
+  if chunk.tool_calls
+    name = chunk.tool_calls.values.first.name
+    print "\n[TOOL CALL: #{name}]\n"
+  elsif chunk.content
+    print chunk.content
+  end
+end
+```
+
+### Basic Agent
+
+```ruby
+# frozen_string_literal: true
+
+# An agent is a Ruby class inheriting from RubyLLM::Agent.
+# model → which LLM to use
+# instructions → system prompt (shown on every turn)
+# tools → list of Tool classes available to the agent
+
+class SupportAgent < RubyLLM::Agent
+  model "gpt-4o"
+  instructions "You are a concise support assistant."
+  tools SearchDocs, LookupAccount
+end
+
+response = SupportAgent.new.ask("How do I reset my API key?")
+```
+
+### Agent with Full Configuration
+
+```ruby
+class WorkAssistant < RubyLLM::Agent
+  model "claude-sonnet-4-5"
+  instructions "You are a helpful assistant. Always cite sources."
+  tools SearchDocs, LookupAccount
+  temperature 0.2
+  params max_output_tokens: 256
+end
+```
+
+### Agent with Rails Chat Model
+
+```ruby
+class WorkAssistant < RubyLLM::Agent
+  chat_model Chat  # persisted Chat record (Rails)
+  model "claude-sonnet-4-5"
+  instructions "You are a helpful assistant."
+  tools SearchDocs, LookupAccount
+end
+```
+
+### Multi-Tool Agent Example
+
+```ruby
+# frozen_string_literal: true
+
+# --- Tools ---
+
+class WebSearch < RubyLLM::Tool
+  description "Search the web for information"
+  param :query, desc: "Search query"
+
+  def execute(query:)
+    # Integration with search provider
+    { results: SearchService.call(query) }
+  end
+end
+
+class Calculator < RubyLLM::Tool
+  description "Perform arithmetic calculations"
+  param :expression, desc: "Math expression"
+
+  def execute(expression:)
+    { result: eval(expression) }
+  end
+end
+
+class FileLookup < RubyLLM::Tool
+  description "Look up file contents by path"
+  param :path, desc: "File path to read"
+
+  def execute(path:)
+    { content: File.read(path) }
+  rescue Errno::ENOENT
+    { error: "File not found: #{path}" }
+  end
+end
+
+# --- Agent ---
+
+class ResearchAssistant < RubyLLM::Agent
+  model "claude-sonnet-4-5"
+  instructions <<~PROMPT
+    You are a research assistant with access to web search,
+    calculator, and file lookup tools. Always cite your sources.
+    Use the most specific tool available for each task.
+  PROMPT
+  tools WebSearch, Calculator, FileLookup
+  temperature 0.3
+end
+
+# Usage
+assistant = ResearchAssistant.new
+response = assistant.ask("Summarize the latest papers on transformer architectures")
+puts response.content
+```
+
+---
+
 ## RAG Pipeline
 
 ### Document Ingestion
