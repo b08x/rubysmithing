@@ -19,16 +19,19 @@ Convention-aware Ruby development plugin for Claude Code. Provides an orchestrat
 .claude-plugin/
   plugin.json           # Plugin manifest
   marketplace.json      # Marketplace distribution
-agents/                        # 1 orchestrator + 8 domain sub-agents
-  rubysmithing-orchestrator.md  # Thin router with direct pass-through
+agents/                        # 1 orchestrator + 9 domain agents + 2 evaluation agents
+  rubysmithing-orchestrator.md  # Thin router with parallel dispatch support
   rubysmithing-context.md       # Gem API verification (SQLite source of truth)
   rubysmithing-main.md          # Hub for POROs, Rake, config
   rubysmithing-scaffold.md      # Project init (rubysmith/gemsmith)
   rubysmithing-genai.md         # LLM, RAG, DSPy, MCP
   rubysmithing-tui.md           # Charm/Bubble TUI
-  rubysmithing-refactor.md      # Convention fixes
-  rubysmithing-report.md        # SIFT Protocol QA
+  rubysmithing-refactor.md      # Convention fixes (do-and-judge retry loop)
+  rubysmithing-report.md        # SIFT Protocol QA (meta-judge verification)
   rubysmithing-yardoc.md        # YARD docs
+  rubysmithing-analyse.md       # Gemba Walk, Muda, Root-Cause, Five Whys
+  rubysmithing-meta-judge.md    # SADD: generates Ruby-calibrated YAML eval specs
+  rubysmithing-judge.md         # SADD: applies eval specs with file:line evidence
 commands/                      # 5 slash commands (/rubysmithing:*)
 hooks/
   hooks.json                   # PostToolUse(Write|Edit) + Stop hooks
@@ -54,6 +57,11 @@ skills/
   rubysmithing-refactor/      # Convention-targeted refactoring
   rubysmithing-report/        # SIFT Protocol V1.0 QA assessment
   rubysmithing-yardoc/        # YARD docs with type inference
+  rubysmithing-analyse/       # Gemba Walk, Muda, Root-Cause Tracing, Five Whys
+    references/
+      analyse-methods.md       # Four analysis methods with templates
+    scripts/
+      create-scratchpad.sh     # Creates .specs/scratchpad/<hex-id>.md in project root
 ```
 
 ## Orchestrator Architecture
@@ -81,6 +89,18 @@ For compound requests (TUI + GenAI, Refactor + Report), the orchestrator assigns
 | Refactor + GenAI | refactor | 0.5 | genai | 0.5 |
 | Scaffold + TUI | scaffold | 0.7 | tui | 0.3 |
 | Refactor + Report | refactor | 0.6 | report | 0.4 |
+
+### Parallel Dispatch
+
+When compound sub-tasks are **independent** (no shared files, no dependency order, no Zeitwerk namespace collision), the orchestrator dispatches them in a single response rather than sequentially:
+
+| Request Type | Dispatch | Reason |
+|:-------------|:---------|:-------|
+| GenAI module + TUI dashboard | PARALLEL | Different file trees, different gem APIs |
+| Analyse + Refactor | SEQUENTIAL | Refactor depends on analyse findings |
+| Refactor + Report | SEQUENTIAL | Report evaluates refactored output |
+| Yardoc + GenAI (different paths) | PARALLEL | No shared output files |
+| Context + any code-gen | SEQUENTIAL | Context must complete first |
 
 ## Context Agent: SQLite Source of Truth
 
@@ -154,9 +174,20 @@ Terminal UI scaffolder for the Ruby Charm/Bubble ecosystem. Includes verified AP
 
 Scaffolds AI/NLP components—chat agents, RAG pipelines, DSPy modules, MCP servers.
 
+### rubysmithing-analyse
+
+Diagnoses *why* problems exist before any fixing begins. Four auto-selected methods:
+
+- **Gemba Walk** — observe actual code vs. assumed behavior; document surprises
+- **Muda Analysis** — map 7 lean waste types to Ruby artifacts (dead methods, sync HTTP, unused Gemfile entries, etc.)
+- **Root-Cause Tracing** — backward call-chain from symptom to origin (classic use: Zeitwerk NameError)
+- **Five Whys** — iterative causal drilling for recurring issues
+
+Findings are keyed to `refactor-patterns.md` pattern names for direct handoff to `rubysmithing-refactor`. Analysis artifacts persist to `.specs/scratchpad/<hex-id>.md` for downstream agent access.
+
 ### rubysmithing-refactor
 
-Rewrites code to follow conventions. Uses a "Pre-Refactor Audit" phase before generating changes... ensuring transparency.
+Rewrites code to follow conventions. Uses a "Pre-Refactor Audit" phase before generating changes, ensuring transparency. For refactors with 1+ CRITICAL audit items or spanning 3+ files, optionally runs the **do-and-judge retry loop**: meta-judge generates an evaluation spec in parallel with refactoring; judge verifies output; one retry if FAIL.
 
 ### rubysmithing-yardoc
 
@@ -164,14 +195,28 @@ YARD documentation generator with semantic analysis and type inference. When tar
 
 ## Routing Workflow
 
-The hub determines the execution path:
+The orchestrator determines the execution path:
 
-1. rubysmithing-context verifies gem APIs (session cache → SQLite cache → Context7 → tiered fallback).
-2. Hub selects Lite or Standard mode. Multi-file tasks always use Standard Mode.
-3. Sub-skills generate/refactor using verified API syntax.
-4. rubysmithing-report provides final QA validation.
+1. **Convention detection** — `.rubocop.yml` → `standard` in Gemfile → `.rubysmith` → community idioms
+2. **rubysmithing-context** verifies gem APIs (SQLite cache → Context7 → tiered fallback)
+3. **Parallel or sequential dispatch** — independent sub-tasks launch simultaneously; dependent sub-tasks sequence explicitly
+4. Sub-agents generate/refactor using verified API syntax
+5. **rubysmithing-report** provides final QA validation (with optional meta-judge verification footer for 3+ file assessments)
 
-Convention detection follows the canonical cascade defined in `rubysmithing/references/convention-detection.md`... all skills reference this single source rather than duplicating logic.
+Convention detection follows the canonical cascade defined in `rubysmithing/references/convention-detection.md` — all agents reference this single source.
+
+## SADD Integration
+
+The plugin incorporates patterns from the SADD (Subagent-Driven Development) framework:
+
+| Pattern | Where Used | Trigger |
+|:--------|:-----------|:--------|
+| **Meta-judge → Judge** | `rubysmithing-report` | 3+ file SIFT assessment or explicit score request |
+| **Do-and-judge retry loop** | `rubysmithing-refactor` | 1+ CRITICAL audit items, 3+ files, or user requests verification |
+| **Scratchpad persistence** | `rubysmithing-analyse` | Directory/multi-file targets, downstream handoff |
+| **Parallel dispatch** | `rubysmithing-orchestrator` | Independent compound sub-tasks |
+
+**Evaluation agents** (`rubysmithing-meta-judge`, `rubysmithing-judge`) are infrastructure — they are called internally by report and refactor, not invoked directly by users. The meta-judge generates a Ruby-calibrated YAML spec once; the judge applies it with file:line evidence citations and a 1-5 weighted score. Pass threshold: 3.5.
 
 ## Stack Reference
 

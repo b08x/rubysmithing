@@ -9,13 +9,13 @@ Rubysmithing v1.0 is a Claude Code plugin providing a convention-aware Ruby deve
 ## Plugin Layout
 
 ```
-.claude-plugin/plugin.json   # Plugin manifest
-agents/                      # Orchestrator + 8 domain sub-agents
+.claude-plugin/plugin.json   # Plugin manifest (12 agents registered)
+agents/                      # Orchestrator + 9 domain agents + 2 evaluation agents
 commands/                    # 5 user-invocable slash commands
 hooks/                       # Convention enforcement hooks
   hooks.json                 # PostToolUse(.rb) + Stop hooks
   scripts/                   # check-ruby-conventions.sh
-skills/                      # 8 auto-discovering skill definitions
+skills/                      # 9 auto-discovering skill definitions
   rubysmithing/              # Hub: POROs, Rake, config, pipelines
   rubysmithing-context/      # Gem API verification (Context7 + SQLite)
   rubysmithing-scaffold/     # rubysmith / gemsmith project init
@@ -24,6 +24,7 @@ skills/                      # 8 auto-discovering skill definitions
   rubysmithing-refactor/     # Convention-targeted refactoring
   rubysmithing-report/       # SIFT Protocol V1.0 QA assessment
   rubysmithing-yardoc/       # YARD docs with type inference
+  rubysmithing-analyse/      # Gemba Walk, Muda, Root-Cause, Five Whys
 ```
 
 ## Prerequisites
@@ -38,13 +39,17 @@ skills/                      # 8 auto-discovering skill definitions
 
 ## No Build System
 
-This repository contains skill and agent definitions, not executable code. No tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The one executable artifact is:
+This repository contains skill and agent definitions, not executable code. No tests, build scripts, Rakefiles, or CI pipelines. Specs are only generated on explicit request (TUI Update functions only). The two executable artifacts are:
 
 ```bash
-ruby skills/rubysmithing-context/scripts/context_cache.rb list       # cached gems + staleness
+# Gem API cache management
+ruby skills/rubysmithing-context/scripts/context_cache.rb list         # cached gems + staleness
 ruby skills/rubysmithing-context/scripts/context_cache.rb check <gem>  # fresh fetch (TTL-aware)
 ruby skills/rubysmithing-context/scripts/context_cache.rb stale <gem>  # stale fetch + warning block
 ruby skills/rubysmithing-context/scripts/context_cache.rb evict <gem>  # force re-resolution
+
+# SADD scratchpad (run from within the user's project repo, not this repo)
+bash skills/rubysmithing-analyse/scripts/create-scratchpad.sh          # creates .specs/scratchpad/<hex-id>.md
 ```
 
 ## Hooks Behavior
@@ -58,15 +63,18 @@ The plugin uses a thin routing orchestrator (`agents/rubysmithing-orchestrator.m
 
 | Agent | Role |
 |:---|:---|
-| **rubysmithing-orchestrator** | Thin router: convention detection + delegates to domain agents |
+| **rubysmithing-orchestrator** | Thin router: convention detection + parallel/sequential dispatch |
 | **rubysmithing-context** | Prerequisite: gem API verification via Context7 + SQLite cache |
 | **rubysmithing-main** | POROs, Rake tasks, config wiring, data pipelines |
 | **rubysmithing-scaffold** | Project initialization via rubysmith / gemsmith CLI |
 | **rubysmithing-genai** | LLM, RAG, DSPy, MCP servers, embeddings, NLP |
 | **rubysmithing-tui** | Charm/Bubble TUI scaffolding |
-| **rubysmithing-refactor** | Convention-targeted refactoring + Pre-Refactor Audit |
-| **rubysmithing-report** | SIFT Protocol V1.0 QA assessment |
+| **rubysmithing-refactor** | Convention-targeted refactoring + Pre-Refactor Audit + do-and-judge loop |
+| **rubysmithing-report** | SIFT Protocol V1.0 QA assessment + meta-judge verification |
 | **rubysmithing-yardoc** | YARD docs with semantic AST analysis and type inference |
+| **rubysmithing-analyse** | Gemba Walk, Muda, Root-Cause Tracing, Five Whys — diagnose before fixing |
+| **rubysmithing-meta-judge** | SADD: generates Ruby-calibrated YAML evaluation specs (infrastructure only) |
+| **rubysmithing-judge** | SADD: applies eval specs with file:line evidence citations (infrastructure only) |
 
 **Routing table (from orchestrator):**
 
@@ -76,11 +84,14 @@ The plugin uses a thin routing orchestrator (`agents/rubysmithing-orchestrator.m
 | LLM, RAG, chatbot, DSPy, MCP, embeddings, NLP | `rubysmithing-genai` | Yes |
 | TUI, BubbleTea, Lipgloss, Huh, Gum, Bubbles | `rubysmithing-tui` | Yes |
 | Refactor, fix conventions, RuboCop violations | `rubysmithing-refactor` | No |
+| Debug, root cause, waste analysis, dead code, muda, gemba | `rubysmithing-analyse` | No |
 | Assess, SIFT, QA, review, code quality | `rubysmithing-report` | No |
 | YARD, documentation, @param, @return | `rubysmithing-yardoc` | If non-stdlib gems present |
 | Classes, modules, Rake, config, POROs, pipelines | `rubysmithing` (main) | If gem-specific code |
 
-**Routing order:** orchestrator → rubysmithing-context (if gems) → domain agent → (optional) rubysmithing-report
+**Routing order:** orchestrator → rubysmithing-context (if gems) → domain agent(s) → (optional) rubysmithing-report
+
+**Parallel dispatch:** When compound sub-tasks are independent (no shared files, no dependency order), the orchestrator dispatches them simultaneously. `rubysmithing-meta-judge` and `rubysmithing-judge` are never routed to directly — they are called internally by `rubysmithing-refactor` and `rubysmithing-report`.
 
 ## Slash Commands
 
@@ -103,11 +114,10 @@ Skills auto-activate on trigger phrases. Each skill is paired with a correspondi
 | **rubysmithing-scaffold** | Project initialization; generates full Rubysmith/Gemsmith skeletons |
 | **rubysmithing-genai** | AI/NLP components: chatbots, RAG pipelines, DSPy modules, MCP servers |
 | **rubysmithing-tui** | Terminal UI scaffolding with Charm/Bubble ecosystem |
-| **rubysmithing-refactor** | Convention-targeted code fixes; runs Pre-Refactor Audit phase first |
-| **rubysmithing-report** | QA assessment via SIFT Protocol V1.0 |
+| **rubysmithing-refactor** | Convention-targeted code fixes; Pre-Refactor Audit + do-and-judge verification |
+| **rubysmithing-report** | QA assessment via SIFT Protocol V1.0; optional meta-judge verification footer |
 | **rubysmithing-yardoc** | YARD docs with semantic AST analysis and type inference |
-
-**Routing order:** rubysmithing-context → rubysmithing (hub, Lite/Standard mode) → sub-skill → rubysmithing-report (QA).
+| **rubysmithing-analyse** | Gemba Walk, Muda, Root-Cause Tracing, Five Whys; findings keyed to refactor-patterns |
 
 Context prerequisites are described in each skill's body text, not frontmatter. The `requires:` field is not part of the supported skill schema.
 
@@ -183,9 +193,24 @@ Use `mcp__plugin_context7_context7__resolve-library-id` then `mcp__plugin_contex
 | Gemsmith | `/bkuhlmann/gemsmith` |
 | ClaudeBox | `/rchgrav/claudebox` |
 
+## SADD Integration
+
+The plugin integrates four patterns from the SADD (Subagent-Driven Development) framework. These are built into existing agents — no separate SADD skill or command exists.
+
+**Meta-judge → Judge pipeline** (`rubysmithing-meta-judge` + `rubysmithing-judge`):
+- `rubysmithing-meta-judge` generates a Ruby-calibrated YAML evaluation spec (5 rubric dimensions + 10 checklist items). Two modes: `sift_report` and `refactor_judge`.
+- `rubysmithing-judge` applies the spec to artifacts with file:line evidence. Default score is 2; scores above 2 require cited evidence. Pass threshold: 3.5/5.0.
+- Neither agent is user-invocable; they are called internally by `rubysmithing-refactor` and `rubysmithing-report`.
+
+**Do-and-judge retry loop** (in `rubysmithing-refactor`): Activates when the pre-refactor audit has 1+ CRITICAL items, the refactor spans 3+ files, or the user requests verification. Meta-judge and refactor run in parallel; judge evaluates the output; one retry allowed on FAIL.
+
+**SIFT + meta-judge** (in `rubysmithing-report`): For Full SIFT Report on 3+ files, meta-judge and SIFT analysis run in parallel, then judge appends a scored verification footer. SIFT is always the primary output.
+
+**Scratchpad persistence** (in `rubysmithing-analyse`): Multi-file analyses write findings to `.specs/scratchpad/<hex-id>.md` in the user's project git root (not this repo). The scratchpad path is passed to downstream agents (`rubysmithing-refactor`, `rubysmithing-report`) for direct reference. `.specs/scratchpad/` is auto-registered in the project's `.gitignore`.
+
 ## Creating or Modifying Skills
 
-Each skill requires a `SKILL.md` with YAML frontmatter (`name`, `description`, optional `requires`), a `references/` directory, and clear activation triggers. Never use `README.md` for skill definitions. SKILL.md should stay under 500 lines; use `references/` files for anything larger and cite them by section from SKILL.md.
+Each skill requires a `SKILL.md` with YAML frontmatter (`name` and `description` — the only supported fields), a `references/` directory, and clear activation triggers. Never use `README.md` for skill definitions. SKILL.md should stay under 500 lines; use `references/` files for anything larger and cite them by section from SKILL.md. Context prerequisites are documented in the skill body text, not in frontmatter fields.
 
 ## Technology Stack
 

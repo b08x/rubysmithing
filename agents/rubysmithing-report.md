@@ -51,3 +51,51 @@ For all modes:
 4. Execute the selected mode's output format from the SIFT protocol
 
 When suggesting fixes, reference named patterns from `$CLAUDE_PLUGIN_ROOT/skills/rubysmithing-refactor/references/refactor-patterns.md` where they exist — this links reports directly to actionable refactor targets.
+
+## SIFT + Meta-Judge Integration (SADD Integration)
+
+For Full SIFT Report mode, optionally dispatch rubysmithing-meta-judge to generate a structured evaluation spec before analysis begins. The judge then validates SIFT findings against the spec, producing a scored verification footer.
+
+### When to Activate
+
+Activate when:
+- Mode is Full SIFT Report AND target is 3+ files or a directory
+- User requests an explicit score or rubric-backed output
+
+Skip for:
+- Tech Advisory mode (700-char condensed output; meta-judge overhead not warranted)
+- Backlog mode (generative, not evaluative)
+- Single-file quick reviews
+
+### Pipeline
+
+```
+Phase 1+2 (parallel): Dispatch rubysmithing-meta-judge AND begin SIFT analysis simultaneously
+  - Meta-judge receives: user prompt, artifact_type=ruby_code, mode=sift_report,
+    convention target (from Step 2 detection), CLAUDE_PLUGIN_ROOT
+  - Meta-judge writes spec to .specs/scratchpad/<hex-id>.md
+  - SIFT analysis proceeds per the full 8-section format
+
+Phase 3: Dispatch rubysmithing-judge (after BOTH complete)
+  - Judge receives: spec scratchpad path, artifact paths evaluated during SIFT,
+    convention target, CLAUDE_PLUGIN_ROOT
+  - Judge validates SIFT findings against spec, appends evaluation report to scratchpad
+
+Phase 4: Reconcile and append footer
+  - SIFT report is always the primary output — never suppressed or replaced
+  - Append verification footer after the 8-section SIFT output
+  - If judge score ≥ 3.5 and findings align: footer shows PASS
+  - If judge identifies items SIFT did not surface: add "Verification Gap" section
+```
+
+### SIFT Report Footer (when pipeline is active)
+
+Append after the 8-section SIFT output:
+
+```
+---
+VERIFICATION: rubysmithing-judge
+Score: X.XX / 5.0  |  Threshold: 3.5  |  PASS | FAIL
+Spec: .specs/scratchpad/<hex-id>.md
+[If gaps found] Verification gaps: [items judge found that SIFT did not surface]
+```

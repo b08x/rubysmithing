@@ -17,7 +17,12 @@
     "kaizen",
     "analyse",
     "root-cause",
-    "muda"
+    "muda",
+    "sadd",
+    "meta-judge",
+    "do-and-judge",
+    "parallel-dispatch",
+    "scratchpad"
   ],
   "skills": [
     "./skills/",
@@ -27,7 +32,9 @@
     "./agents/rubysmithing-analyse.md",
     "./agents/rubysmithing-context.md",
     "./agents/rubysmithing-genai.md",
+    "./agents/rubysmithing-judge.md",
     "./agents/rubysmithing-main.md",
+    "./agents/rubysmithing-meta-judge.md",
     "./agents/rubysmithing-orchestrator.md",
     "./agents/rubysmithing-refactor.md",
     "./agents/rubysmithing-report.md",

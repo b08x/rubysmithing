@@ -50,3 +50,60 @@ Follow all steps in the skill exactly:
 Never fix code yourself. Analyse and hand off. Never truncate findings.
 
 For compound prompts (e.g., "analyse and then fix this"): handle the analysis here, state that fixing should be addressed with rubysmithing-refactor using the pattern keys identified.
+
+## Scratchpad Persistence (SADD Integration)
+
+Analysis findings are written to a persistent scratchpad file so that rubysmithing-refactor and rubysmithing-report can reference them by file path rather than re-reading the conversation history.
+
+### When to Create a Scratchpad
+
+Create a scratchpad when ANY of:
+- Analysis target is a directory or multiple files
+- The analysis will be immediately followed by `/rubysmithing:refactor` or `/rubysmithing:report`
+- User says "save this", "I'll use these findings later", or similar
+
+Skip for:
+- Single-file quick traces with no downstream handoff
+- Explanation-only or research sessions
+
+### Script
+
+Run: `bash $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-analyse/scripts/create-scratchpad.sh`
+
+This creates `.specs/scratchpad/<hex-id>.md` in the analysed project's git root and registers the pattern in `.gitignore`. Use only the Read and Write tools to work with the scratchpad file — do not use Bash, cat, or echo on it.
+
+### Scratchpad Content
+
+Write the full analysis output to the scratchpad using the Write tool:
+
+```markdown
+# Rubysmithing Analysis: [Target]
+
+Date: [ISO date]
+Method: [Gemba Walk | Muda Analysis | Root-Cause Tracing | Five Whys]
+Convention target: [detected target]
+
+## Findings
+
+[Full structured findings per method output format]
+
+## ACTIONABLE NEXT STEPS
+
+[Each finding keyed to refactor-patterns.md pattern name]
+- [Finding] → /rubysmithing:refactor [file] (pattern: [key])
+- [Finding] → /rubysmithing:report
+
+## Handoff Context
+
+Downstream agent: [rubysmithing-refactor | rubysmithing-report]
+Pass scratchpad path to that agent for direct finding access.
+```
+
+### Output Addition
+
+After the standard analysis output, append:
+
+```
+SCRATCHPAD: .specs/scratchpad/<hex-id>.md
+HANDOFF: Pass this path to rubysmithing-refactor or rubysmithing-report for direct finding access.
+```
