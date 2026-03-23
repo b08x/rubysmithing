@@ -85,23 +85,40 @@ When a request spans multiple domains (e.g., "refactor this RAG pipeline AND bui
 1. Acknowledge the compound nature
 2. Name which sub-agent handles which part
 3. Sequence correctly: `rubysmithing-context` first if needed, then domain agents
-4. Assign routing weights based on effort distribution:
-   - Primary agent gets the main portion of the work
-   - Secondary agents handle supporting components
+4. Assign routing weights **dynamically** based on effort analysis (see Dynamic Weighting section below)
 5. State: "Handling [part A] with [sub-agent A]. [Part B] will be handled by [sub-agent B]."
 
-### Routing Weights for Compound Requests
+### Dynamic Weighting for Compound Requests
 
-For compound requests, estimate effort distribution:
+When dispatching compound tasks, **analyze the user's prompt to determine the relative complexity of each sub-task**. Assign an effort weight (0.1 to 0.9, summing to 1.0) based on this analysis.
 
-| Request Type | Primary Agent | Weight | Secondary Agent | Weight |
-|:-------------|:-------------|:------:|:---------------|:------:|
-| TUI + GenAI | `rubysmithing-genai` | 0.6 | `rubysmithing-tui` | 0.4 |
-| Refactor + GenAI | `rubysmithing-refactor` | 0.5 | `rubysmithing-genai` | 0.5 |
-| Scaffold + TUI | `rubysmithing-scaffold` | 0.7 | `rubysmithing-tui` | 0.3 |
-| Refactor + Report | `rubysmithing-refactor` | 0.6 | `rubysmithing-report` | 0.4 |
-| Analyse + Refactor | `rubysmithing-analyse` | 0.4 | `rubysmithing-refactor` | 0.6 |
-| Report + Analyse | `rubysmithing-report` | 0.5 | `rubysmithing-analyse` | 0.5 |
+**Complexity factors to consider:**
+- Number of files likely to be generated/modified
+- Depth of gem dependency chain (more gems = higher complexity)
+- Integration surface area (API design, database schema, UI components)
+- Novel vs. boilerplate code ratio
+- Cross-cutting concerns (auth, validation, error handling)
+
+**Example:**
+- User: "Build a RAG pipeline with a monitoring TUI dashboard"
+  - GenAI (RAG pipeline): embeddings, vector store, retrieval logic, LLM integration → **0.8**
+  - TUI (dashboard): simple metrics display → **0.2**
+
+- User: "Refactor this monolith and add a TUI config editor"
+  - Refactor: structural changes across 10+ files → **0.7**
+  - TUI: single config form component → **0.3**
+
+**Fallback rule:** If complexity cannot be determined, distribute weights evenly across required agents.
+
+**Reference weights for common patterns (adjust based on actual request):**
+
+| Request Type | Primary | Weight | Secondary | Weight |
+|:-------------|:--------|:------:|:----------|:------:|
+| TUI + GenAI | genai | 0.6 | tui | 0.4 |
+| Refactor + GenAI | refactor | 0.5 | genai | 0.5 |
+| Scaffold + TUI | scaffold | 0.7 | tui | 0.3 |
+| Refactor + Report | refactor | 0.6 | report | 0.4 |
+| Analyse + Refactor | analyse | 0.4 | refactor | 0.6 |
 
 ## Output Format
 

@@ -59,3 +59,17 @@ Standard Mode conventions always apply:
 - `circuit_breaker` wrapping external API calls
 
 Output: file path → complete content → one-line rationale (non-obvious decisions only) → Gemfile additions → mode applied.
+
+## Scratchpad Cleanup
+
+The `rubysmithing-analyse` agent creates diagnostic scratchpad files in `.specs/scratchpad/`. These accumulate over time. Offer cleanup when appropriate:
+
+```bash
+ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-analyse/scripts/sweep-scratchpads.rb --dry-run
+ruby $CLAUDE_PLUGIN_ROOT/skills/rubysmithing-analyse/scripts/sweep-scratchpads.rb --ttl 24
+```
+
+**When to suggest cleanup:**
+- At session start if previous scratchpads exist
+- After completing a multi-file analysis workflow
+- When user mentions "cleanup" or "scratchpad"
