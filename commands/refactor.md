@@ -1,6 +1,6 @@
 ---
 description: Audit and refactor a Ruby file toward project-detected conventions (RuboCop, StandardRB, or Rubysmith defaults).
-argument-hint: <file-path>
+argument-hint: "<file-path>"
 allowed-tools: ["Read", "Write", "Grep", "Glob", "Bash"]
 ---
 

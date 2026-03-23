@@ -122,7 +122,11 @@ Set `Direct pass-through: true` when the sub-agent produces a complete, self-con
 - **rubysmithing-yardoc**: Always true (YARD docs are complete documentation)
 - **rubysmithing-scaffold**: True after CLI execution (project structure is complete)
 - **rubysmithing-analyse**: Always true (findings are complete analyses, not generation intermediates)
-- **All other agents**: False (code generation needs orchestration context)
+- **rubysmithing-genai**: True (generated code artifacts must reach the user unmodified)
+- **rubysmithing-tui**: True (generated TUI scaffolds must reach the user unmodified)
+- **rubysmithing-context**: False (produces intermediate gem verification, feeds other agents)
+- **rubysmithing-refactor**: False (refactored code benefits from orchestration convention cross-check)
+- **rubysmithing** (main): False (pipeline code may need convention cross-check before delivery)
 
 **Why this matters**: Prevents the "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly, losing fidelity.
 

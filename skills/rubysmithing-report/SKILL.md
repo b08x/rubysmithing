@@ -56,6 +56,14 @@ or `[hotkey="tech advisory"]`.
 
 Condensed review → 700-character advisory + 2–5 bare links. Critical issues only.
 
+### JSON Output Mode
+
+Triggered by: `--json`, `[format="json"]`, "output json", "machine-readable output".
+
+Produce a single JSON object conforming to `references/sift-schema.json`.
+All 8 SIFT sections are represented as structured fields.
+Return raw JSON only — no Markdown prose, no emoji, no section headers.
+
 ## Step 3: Detect Convention Target
 
 Same detection order as all other sub-skills:

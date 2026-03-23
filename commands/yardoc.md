@@ -1,6 +1,6 @@
 ---
 description: Generate comprehensive YARD documentation for a Ruby file using semantic AST analysis and type inference.
-argument-hint: <file-path>
+argument-hint: "<file-path>"
 allowed-tools: ["Read", "Write", "Grep", "Glob"]
 ---
 

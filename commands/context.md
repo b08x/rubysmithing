@@ -1,6 +1,6 @@
 ---
 description: Check or warm the rubysmithing gem API cache. Resolves current method signatures via Context7 MCP and persists results to the SQLite cache.
-argument-hint: <gem-name>
+argument-hint: "<gem-name>"
 allowed-tools: ["Bash", "Read"]
 ---
 

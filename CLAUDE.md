@@ -109,13 +109,7 @@ Skills auto-activate on trigger phrases. Each skill is paired with a correspondi
 
 **Routing order:** rubysmithing-context → rubysmithing (hub, Lite/Standard mode) → sub-skill → rubysmithing-report (QA).
 
-Skills declare prerequisites in frontmatter:
-```yaml
----
-name: rubysmithing-yardoc
-requires: [rubysmithing-context]
----
-```
+Context prerequisites are described in each skill's body text, not frontmatter. The `requires:` field is not part of the supported skill schema.
 
 ## Execution Modes
 

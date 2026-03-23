@@ -6,11 +6,14 @@ Always run `rubysmithing-context` before generating if the gem API is not covere
 **Verified source of truth:** `docker/prompt.txt` — if this file conflicts with `docker/prompt.txt`,
 the prompt file takes precedence.
 
-**Known incorrect patterns (do not use):**
-- `BubbleTea::Quit` → use `Bubbletea.quit`
-- `Lipgloss::Align::LEFT` → use `:left` (symbol, no `Lipgloss::Align` wrapper)
-- `Lipgloss::Color.new("#HEX")` → use `.foreground("#HEX")` (plain hex string)
-- `Struct.new(...).with(...)` for App-level state → use plain `@ivar`
+### Migration Guide (Legacy → Verified API)
+
+| Legacy (Do Not Use) | Verified API | Notes |
+|:---|:---|:---|
+| `BubbleTea::Quit` | `Bubbletea.quit` | Module method, lowercase |
+| `Lipgloss::Align::LEFT` | `:left` | Symbol, no class wrapper |
+| `Lipgloss::Color.new("#HEX")` | `.foreground("#HEX")` | Plain hex string |
+| `Struct.new(...).with(...)` for App state | plain `@ivar` | App-level state only |
 
 ---
 
