@@ -149,7 +149,7 @@ Canonical cascade lives in `rubysmithing/references/convention-detection.md` —
 
 The skill has two reference layers — keep them separate:
 
-- **`references/tui-patterns.md`** — Bubble gem API syntax and component code examples. **Known debt:** contains stale `Lipgloss::Align::LEFT`, `BubbleTea::Program`, and `Lipgloss::Color.new` patterns that conflict with verified Context7 API. Do not use these as authoritative syntax; run rubysmithing-context for live verification.
+- **`references/tui-patterns.md`** — Bubble gem API syntax and component code examples. Includes Migration Guide (lines 9-16) mapping deprecated patterns to verified Context7 equivalents. All code examples use verified syntax.
 - **`references/design-patterns.md`** — Architectural decisions: layout paradigm selector (7 paradigms), semantic color tokens, four-layer keyboard architecture (L0–L3), three-tier help system, focus management, command palette pattern, anti-pattern checklist, compatibility checklist.
 
 **Skeleton** lives in `assets/skeleton/`. Copy and rename `app_name` → snake_case, `AppName` → CamelCase, `APP_NAME` → SCREAMING_SNAKE.
