@@ -176,7 +176,7 @@ Scaffolds AI/NLP components—chat agents, RAG pipelines, DSPy modules, MCP serv
 
 ### rubysmithing-analyse
 
-Diagnoses *why* problems exist before any fixing begins. Four auto-selected methods:
+Diagnoses *why* problems exist before any fixing begins. Four auto-selected methods adapted from the [Kaizen plugin](https://cek.neolab.finance) (Context Engineering Kit):
 
 - **Gemba Walk** — observe actual code vs. assumed behavior; document surprises
 - **Muda Analysis** — map 7 lean waste types to Ruby artifacts (dead methods, sync HTTP, unused Gemfile entries, etc.)
@@ -207,7 +207,7 @@ Convention detection follows the canonical cascade defined in `rubysmithing/refe
 
 ## SADD Integration
 
-The plugin incorporates patterns from the SADD (Subagent-Driven Development) framework:
+The plugin incorporates patterns from the [SADD (Subagent-Driven Development)](https://cek.neolab.finance) plugin, part of the [Context Engineering Kit](https://cek.neolab.finance) by neolab.finance:
 
 | Pattern | Where Used | Trigger |
 |:--------|:-----------|:--------|
