@@ -1,6 +1,16 @@
 .codemap/
 repomix.config.json
-rubysmithing-skills.xml
 .repomixignore
 logs/
 output/
+
+# Repomix merged codebase artifacts
+agents/rubysmithing-agents.md
+agents/rubysmithing.xml
+commands/rubysmithing-commands.md
+commands/rubysmithing.xml
+hooks/rubysmithing-hooks.md
+hooks/rubysmithing.xml
+skills/rubysmithing-skills.md
+skills/rubysmithing.xml
+rubysmithing-skills.xml
