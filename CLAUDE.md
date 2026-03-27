@@ -208,6 +208,25 @@ The plugin integrates four patterns from the SADD (Subagent-Driven Development) 
 
 **Scratchpad persistence** (in `rubysmithing-analyse`): Multi-file analyses write findings to `.specs/scratchpad/<hex-id>.md` in the user's project git root (not this repo). The scratchpad path is passed to downstream agents (`rubysmithing-refactor`, `rubysmithing-report`) for direct reference. `.specs/scratchpad/` is auto-registered in the project's `.gitignore`.
 
+## Security
+
+### Prompt Injection Hardening
+
+Agent `description:` fields in frontmatter use `<example>` XML tags — this is the Claude Code platform convention for routing examples and is acceptable for **developer-authored static content**.
+
+The following rules apply when dynamic content is involved:
+
+- **Never embed user-controlled input** in agent `description:` fields or system prompt sections. Agent descriptions are loaded at routing time; injected content here can alter agent selection behavior.
+- **Never write user-provided strings directly to `.md` agent files** without stripping angle brackets (`<`, `>`). If any workflow generates or modifies agent files programmatically, sanitize before write.
+- **Skill YAML frontmatter** (`name:`, `description:`) must never contain angle brackets sourced from user input. The `description:` field is parsed as YAML and injected into context — an unescaped `<` can begin a rogue XML instruction.
+- **The convention hook** (`hooks/scripts/check-ruby-conventions.sh`) validates `.rb` files only. It does not validate agent or skill `.md` files. Do not rely on it for injection prevention in non-Ruby artifacts.
+
+When in doubt: static developer-authored XML tags in frontmatter are safe; user-derived content in any frontmatter field is not.
+
+### Error Contract
+
+All sub-agents use the shared error schema at `skills/rubysmithing/references/error-contract.md`. The orchestrator uses `[AGENT ERROR]` blocks to make intelligent recovery decisions. Never return bare failure strings from sub-agents.
+
 ## Creating or Modifying Skills
 
 Each skill requires a `SKILL.md` with YAML frontmatter (`name` and `description` — the only supported fields), a `references/` directory, and clear activation triggers. Never use `README.md` for skill definitions. SKILL.md should stay under 500 lines; use `references/` files for anything larger and cite them by section from SKILL.md. Context prerequisites are documented in the skill body text, not in frontmatter fields.
