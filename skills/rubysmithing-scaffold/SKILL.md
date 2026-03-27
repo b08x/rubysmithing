@@ -1,6 +1,5 @@
 ---
 name: rubysmithing-scaffold
-requires: []
 description: Ruby project scaffolder using rubysmith (apps, tools, scripts) or gemsmith
   (publishable gems). Activates on any mention of: scaffold a project, scaffold a gem,
   new ruby project, new gem, create gem, bootstrap project, rubysmith, gemsmith,

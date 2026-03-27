@@ -61,7 +61,7 @@ Convention-aware Ruby development suite. Plugin config + documentation (no execu
 
 **Multi-file scaffold → always Standard Mode.**
 
-**Skill frontmatter:** `requires: [rubysmithing-context]` for dependency graph.
+**Skill frontmatter:** `name:` and `description:` are the only supported fields. Context prerequisites are documented in the skill body text.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 

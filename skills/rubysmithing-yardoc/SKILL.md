@@ -1,6 +1,5 @@
 ---
 name: rubysmithing-yardoc
-requires: [rubysmithing-context]
 description: YARD documentation generator with semantic analysis for Ruby files. Automatically activates on requests to generate, add, or improve YARD documentation. Uses AST parsing and type inference to generate comprehensive @param, @return, @example, and @raise tags. Maintains consistency with existing project documentation patterns and YARD configuration. Generates production-grade documentation that eliminates usage pitfalls and accelerates correct method implementation. Requires rubysmithing-context when the target file uses non-stdlib gems, to ensure type annotations reflect verified API shapes.
 color: red
 ---
