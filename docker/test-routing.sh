@@ -12,7 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
-ORCHESTRATOR="$PLUGIN_ROOT/agents/rubysmithing-orchestrator.md"
+ORCHESTRATOR="$PLUGIN_ROOT/skills/rubysmithing/agents/rubysmithing-orchestrator.md"
 
 # Colors for output
 RED='\033[0;31m'

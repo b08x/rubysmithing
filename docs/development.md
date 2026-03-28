@@ -18,7 +18,7 @@ Most changes are edits to `.md` files.
 
 ## Agent Files
 
-Agents live in `agents/rubysmithing-{name}.md`. Each file has YAML frontmatter followed by the agent's system prompt.
+Agents live in `skills/rubysmithing-{name}/agents/rubysmithing-{name}.md`. Each file has YAML frontmatter followed by the agent's system prompt. Hub skill agents (orchestrator, main) live in `skills/rubysmithing/agents/`.
 
 ### Supported Frontmatter Fields (Agents)
 
@@ -44,9 +44,9 @@ Agent `description:` fields use `<example>` XML tags for routing examples — th
 
 ### Adding a New Agent
 
-1. Create `agents/rubysmithing-{name}.md` with frontmatter
-2. Register it in `.claude-plugin/plugin.json` under `"agents"`
-3. Add a routing entry in `agents/rubysmithing-orchestrator.md` routing table
+1. Create `skills/rubysmithing-{name}/agents/rubysmithing-{name}.md` with frontmatter
+2. Register it in `.claude-plugin/plugin.json` under `"agents"` with the full relative path
+3. Add a routing entry in `skills/rubysmithing/agents/rubysmithing-orchestrator.md` routing table
 4. Create the corresponding `skills/rubysmithing-{name}/SKILL.md` if the agent uses a skill
 
 ---
@@ -109,9 +109,9 @@ List trigger phrases here.
 
 ## Convention Hook
 
-`hooks/scripts/check-ruby-conventions.sh` fires on every `.rb` file write. To modify it:
+`skills/rubysmithing/hooks/scripts/check-ruby-conventions.sh` fires on every `.rb` file write. To modify it:
 
-1. Read `hooks/hooks.json` to understand which tool events trigger it
+1. Read `skills/rubysmithing/hooks/hooks.json` to understand which tool events trigger it
 2. The script receives tool call metadata as JSON on stdin — requires `jq` to parse
 3. It filters to `.rb` files only; non-Ruby files are ignored
 4. Violations inject a correction prompt into the conversation

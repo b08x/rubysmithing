@@ -4,27 +4,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rubysmithing v1.0 is a Claude Code plugin providing a convention-aware Ruby development suite. It uses an orchestrator/sub-agent architecture backed by a hub-and-spoke skill system. The plugin manifest lives at `.claude-plugin/plugin.json`.
+Rubysmithing v1.1 is a Claude Code plugin providing a convention-aware Ruby development suite. It uses an orchestrator/sub-agent architecture backed by a hub-and-spoke skill system. The plugin manifest lives at `.claude-plugin/plugin.json`.
 
 ## Plugin Layout
 
+Skill-centric co-location: agents, commands, and hooks live inside the skill they belong to.
+
 ```
-.claude-plugin/plugin.json   # Plugin manifest (12 agents registered)
-agents/                      # Orchestrator + 9 domain agents + 2 evaluation agents
-commands/                    # 5 user-invocable slash commands
-hooks/                       # Convention enforcement hooks
-  hooks.json                 # PostToolUse(.rb) + Stop hooks
-  scripts/                   # check-ruby-conventions.sh
-skills/                      # 9 auto-discovering skill definitions
+.claude-plugin/plugin.json   # Plugin manifest (metadata + explicit agent paths)
+skills/
   rubysmithing/              # Hub: POROs, Rake, config, pipelines
-  rubysmithing-context/      # Gem API verification (Context7 + SQLite)
-  rubysmithing-scaffold/     # rubysmith / gemsmith project init
-  rubysmithing-genai/        # LLM, RAG, DSPy, MCP, embeddings
-  rubysmithing-tui/          # Charm/Bubble TUI scaffolder
-  rubysmithing-refactor/     # Convention-targeted refactoring
-  rubysmithing-report/       # SIFT Protocol V1.0 QA assessment
-  rubysmithing-yardoc/       # YARD docs with type inference
+    agents/                  # rubysmithing-orchestrator.md, rubysmithing-main.md
+    hooks/                   # Convention enforcement hooks (plugin-wide)
+      hooks.json             # PostToolUse(.rb) + Stop hooks
+      scripts/               # check-ruby-conventions.sh
+    references/              # convention-detection.md, conventions.md, error-contract.md
   rubysmithing-analyse/      # Gemba Walk, Muda, Root-Cause, Five Whys
+    agents/                  # rubysmithing-analyse.md
+    commands/                # analyse.md
+    scripts/                 # create-scratchpad.sh, sweep-scratchpads.rb
+  rubysmithing-context/      # Gem API verification (Context7 + SQLite)
+    agents/                  # rubysmithing-context.md
+    commands/                # context.md
+    scripts/                 # context_cache.rb
+  rubysmithing-genai/        # LLM, RAG, DSPy, MCP, embeddings
+    agents/                  # rubysmithing-genai.md
+  rubysmithing-refactor/     # Convention-targeted refactoring
+    agents/                  # rubysmithing-refactor.md
+    commands/                # refactor.md
+  rubysmithing-report/       # SIFT Protocol V1.0 QA assessment
+    agents/                  # rubysmithing-report.md, rubysmithing-meta-judge.md, rubysmithing-judge.md
+    commands/                # report.md
+  rubysmithing-scaffold/     # rubysmith / gemsmith project init
+    agents/                  # rubysmithing-scaffold.md
+    commands/                # scaffold.md
+  rubysmithing-tui/          # Charm/Bubble TUI scaffolder
+    agents/                  # rubysmithing-tui.md
+    assets/skeleton/         # BubbleTea app template
+  rubysmithing-yardoc/       # YARD docs with type inference
+    agents/                  # rubysmithing-yardoc.md
+    commands/                # yardoc.md
 ```
 
 ## Prerequisites
@@ -59,7 +78,7 @@ bash skills/rubysmithing-analyse/scripts/create-scratchpad.sh          # creates
 
 ## Orchestrator / Sub-Agent Architecture
 
-The plugin uses a thin routing orchestrator (`agents/rubysmithing-orchestrator.md`) that delegates to domain sub-agents. Each sub-agent loads its corresponding SKILL.md as its primary reference.
+The plugin uses a thin routing orchestrator (`skills/rubysmithing/agents/rubysmithing-orchestrator.md`) that delegates to domain sub-agents. Each sub-agent loads its corresponding SKILL.md as its primary reference.
 
 | Agent | Role |
 |:---|:---|
@@ -219,7 +238,7 @@ The following rules apply when dynamic content is involved:
 - **Never embed user-controlled input** in agent `description:` fields or system prompt sections. Agent descriptions are loaded at routing time; injected content here can alter agent selection behavior.
 - **Never write user-provided strings directly to `.md` agent files** without stripping angle brackets (`<`, `>`). If any workflow generates or modifies agent files programmatically, sanitize before write.
 - **Skill YAML frontmatter** (`name:`, `description:`) must never contain angle brackets sourced from user input. The `description:` field is parsed as YAML and injected into context — an unescaped `<` can begin a rogue XML instruction.
-- **The convention hook** (`hooks/scripts/check-ruby-conventions.sh`) validates `.rb` files only. It does not validate agent or skill `.md` files. Do not rely on it for injection prevention in non-Ruby artifacts.
+- **The convention hook** (`skills/rubysmithing/hooks/scripts/check-ruby-conventions.sh`) validates `.rb` files only. It does not validate agent or skill `.md` files. Do not rely on it for injection prevention in non-Ruby artifacts.
 
 When in doubt: static developer-authored XML tags in frontmatter are safe; user-derived content in any frontmatter field is not.
 

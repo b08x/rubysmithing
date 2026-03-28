@@ -6,7 +6,7 @@ Domain terms, acronyms, and project-specific vocabulary used throughout the ruby
 
 ## A
 
-**Agent** — A `.md` file in `agents/` that defines an autonomous sub-process with a specific role. Agents receive routing decisions from the orchestrator and execute multi-step tasks using tools (Read, Grep, Glob, Write, Edit, Agent).
+**Agent** — A `.md` file in `skills/{name}/agents/` that defines an autonomous sub-process with a specific role. Agents receive routing decisions from the orchestrator and execute multi-step tasks using tools (Read, Grep, Glob, Write, Edit, Agent).
 
 **async** — The `async` gem providing fiber-based concurrency in Ruby. Standard Mode requires `Async { }` blocks instead of `Thread.new` for all concurrent work. See: [async gem](https://github.com/socketry/async).
 
@@ -74,7 +74,7 @@ Domain terms, acronyms, and project-specific vocabulary used throughout the ruby
 
 ## O
 
-**Orchestrator** — The thin routing agent (`agents/rubysmithing-orchestrator.md`) that analyzes requests, performs convention detection, determines parallel vs sequential dispatch, and delegates to domain sub-agents. Never implements anything itself.
+**Orchestrator** — The thin routing agent (`skills/rubysmithing/agents/rubysmithing-orchestrator.md`) that analyzes requests, performs convention detection, determines parallel vs sequential dispatch, and delegates to domain sub-agents. Never implements anything itself.
 
 ---
 

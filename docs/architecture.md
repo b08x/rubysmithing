@@ -34,7 +34,7 @@ rubysmithing-orchestrator          ← Convention detection + routing
 
 ### Orchestrator
 
-`agents/rubysmithing-orchestrator.md` — Entry point for all requests. Responsibilities:
+`skills/rubysmithing/agents/rubysmithing-orchestrator.md` — Entry point for all requests. Responsibilities:
 
 1. **Convention scan** — checks for `.rubocop.yml`, `standard` in Gemfile, `.rubysmith` file
 2. **Gem dependency detection** — flags non-stdlib gems to trigger `rubysmithing-context`
@@ -231,24 +231,26 @@ Four patterns from the Subagent-Driven Development framework are built into exis
 
 ```
 .claude-plugin/
-  plugin.json            # Manifest: 12 agents registered
-agents/                  # 12 .md agent definitions
-commands/                # 5 slash command definitions
-hooks/
-  hooks.json             # PostToolUse(Write|Edit) + Stop hooks
-  scripts/
-    check-ruby-conventions.sh
+  plugin.json            # Manifest: metadata + explicit agent paths
 skills/
   rubysmithing/          # Hub
+    agents/              # rubysmithing-orchestrator.md, rubysmithing-main.md
+    hooks/               # Convention enforcement (plugin-wide)
+      hooks.json         # PostToolUse(Write|Edit) + Stop hooks
+      scripts/
+        check-ruby-conventions.sh
     references/
       convention-detection.md   # Canonical detection cascade
       conventions.md            # Community idiom fallback patterns
   rubysmithing-context/
+    agents/              # rubysmithing-context.md
+    commands/            # context.md
     references/
       gem-registry.md           # Context7 IDs × architectural roles (225 entries)
     scripts/
       context_cache.rb          # CLI: list/check/stale/evict
   rubysmithing-tui/
+    agents/              # rubysmithing-tui.md
     references/
       tui-patterns.md           # Context7-verified Bubble gem API patterns
       design-patterns.md        # Layout paradigms, anti-patterns, keyboard arch

@@ -1,6 +1,6 @@
 {
   "name": "rubysmithing",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Convention-aware Ruby development suite. Hub-and-spoke skill system with orchestrated agents for code generation, TUI scaffolding, AI/NLP components, refactoring, QA assessment, and YARD documentation.",
   "author": {
     "name": "Robert Pannick"
@@ -25,21 +25,20 @@
     "scratchpad"
   ],
   "skills": [
-    "./skills/",
-    "./commands/"
+    "./skills/"
   ],
   "agents": [
-    "./agents/rubysmithing-analyse.md",
-    "./agents/rubysmithing-context.md",
-    "./agents/rubysmithing-genai.md",
-    "./agents/rubysmithing-judge.md",
-    "./agents/rubysmithing-main.md",
-    "./agents/rubysmithing-meta-judge.md",
-    "./agents/rubysmithing-orchestrator.md",
-    "./agents/rubysmithing-refactor.md",
-    "./agents/rubysmithing-report.md",
-    "./agents/rubysmithing-scaffold.md",
-    "./agents/rubysmithing-tui.md",
-    "./agents/rubysmithing-yardoc.md"
+    "./skills/rubysmithing/agents/rubysmithing-orchestrator.md",
+    "./skills/rubysmithing/agents/rubysmithing-main.md",
+    "./skills/rubysmithing-analyse/agents/rubysmithing-analyse.md",
+    "./skills/rubysmithing-context/agents/rubysmithing-context.md",
+    "./skills/rubysmithing-genai/agents/rubysmithing-genai.md",
+    "./skills/rubysmithing-refactor/agents/rubysmithing-refactor.md",
+    "./skills/rubysmithing-report/agents/rubysmithing-report.md",
+    "./skills/rubysmithing-report/agents/rubysmithing-meta-judge.md",
+    "./skills/rubysmithing-report/agents/rubysmithing-judge.md",
+    "./skills/rubysmithing-scaffold/agents/rubysmithing-scaffold.md",
+    "./skills/rubysmithing-tui/agents/rubysmithing-tui.md",
+    "./skills/rubysmithing-yardoc/agents/rubysmithing-yardoc.md"
   ]
 }

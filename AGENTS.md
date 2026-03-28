@@ -38,7 +38,7 @@ Convention-aware Ruby development suite. Plugin config + documentation (no execu
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Agent routing logic | `agents/rubysmithing-orchestrator.md` | Thin router, convention detection, weight assignment |
+| Agent routing logic | `skills/rubysmithing/agents/rubysmithing-orchestrator.md` | Thin router, convention detection, weight assignment |
 | Gem API verification | `skills/rubysmithing-context/` | SQLite cache + Context7 resolution |
 | TUI code generation | `skills/rubysmithing-tui/` | VERIFIED API patterns only |
 | Convention rules | `skills/rubysmithing/references/convention-detection.md` | Canonical cascade — all skills reference this |

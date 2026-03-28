@@ -49,6 +49,6 @@ The orchestrator uses a routing table, convention detection, and dynamic effort 
 
 ## Sources
 
-- `agents/rubysmithing-orchestrator.md` — routing table and dispatch logic
+- `skills/rubysmithing/agents/rubysmithing-orchestrator.md` — routing table and dispatch logic
 - `CLAUDE.md` — orchestrator/sub-agent architecture section
 - `CHANGELOG.md` — "Reorganize and refine rubysmithing suite to v1.0" (refactor entry)

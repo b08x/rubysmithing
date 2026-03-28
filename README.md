@@ -61,68 +61,69 @@ The PostToolUse hook runs `check-ruby-conventions.sh` on every `.rb` file write.
 
 ## Installation
 
-Place the following directories in the Claude Code skills path:
+Place the `skills/` directory in the Claude Code skills path:
 
 ```
-agents/
-commands/
-hooks/
 skills/
 ```
 
-Reference `rubysmithing` as the primary hub. Sub-skills activate automatically on trigger phrases.
+All agents, commands, and hooks are co-located inside their respective skill directory. Reference `rubysmithing` as the primary hub. Sub-skills activate automatically on trigger phrases.
 
 ---
 
 ## Plugin Layout
 
+Agents, commands, and hooks are co-located inside each skill directory.
+
 ```
-agents/
-  rubysmithing-orchestrator.md     # Thin router with parallel dispatch
-  rubysmithing-context.md          # Gem API verification (SQLite source of truth)
-  rubysmithing-main.md             # Hub for POROs, Rake, config wiring
-  rubysmithing-scaffold.md         # rubysmith/gemsmith project init
-  rubysmithing-genai.md            # LLM, RAG, DSPy, MCP, embeddings
-  rubysmithing-tui.md              # Charm/Bubble TUI scaffolder
-  rubysmithing-refactor.md         # Convention fixes with pre-audit phase
-  rubysmithing-report.md           # SIFT Protocol QA assessment
-  rubysmithing-yardoc.md           # YARD documentation with type inference
-  rubysmithing-analyse.md          # Gemba Walk, Muda, Root-Cause, Five Whys
-  rubysmithing-meta-judge.md       # SADD: generates Ruby-calibrated YAML eval specs
-  rubysmithing-judge.md            # SADD: applies eval specs with file:line evidence
-
-commands/
-  # 5 slash command definitions: context, report, scaffold, refactor, yardoc
-
-hooks/
-  hooks.json                       # PostToolUse(Write|Edit) + Stop hooks
-  scripts/check-ruby-conventions.sh # RuboCop/StandardRB/community idiom validator
-
 skills/
   rubysmithing/                    # Hub — routes to sub-skills
+    agents/
+      rubysmithing-orchestrator.md # Thin router with parallel dispatch
+      rubysmithing-main.md         # Hub for POROs, Rake, config wiring
+    hooks/
+      hooks.json                   # PostToolUse(Write|Edit) + Stop hooks
+      scripts/check-ruby-conventions.sh  # RuboCop/StandardRB/community idiom validator
     references/
-      convention-detection.md     # Canonical cascade (RuboCop → StandardRB → rubysmith → community)
-      conventions.md              # Fallback community idiom patterns
-  rubysmithing-context/           # Context7 + SQLite cache
+      convention-detection.md      # Canonical cascade (RuboCop → StandardRB → rubysmith → community)
+      conventions.md               # Fallback community idiom patterns
+  rubysmithing-context/            # Context7 + SQLite cache
+    agents/rubysmithing-context.md
+    commands/context.md
     references/
-      gem-registry.md             # Context7 IDs × architectural roles (225 entries)
+      gem-registry.md              # Context7 IDs × architectural roles (225 entries)
     scripts/
-      context_cache.rb            # CLI: list, check, stale, evict
-  rubysmithing-tui/               # Bubble/TUI scaffolding
+      context_cache.rb             # CLI: list, check, stale, evict
+  rubysmithing-tui/                # Bubble/TUI scaffolding
+    agents/rubysmithing-tui.md
     references/
-      tui-patterns.md             # Context7-verified Bubble gem API patterns
-      design-patterns.md          # Architecture decisions, layout paradigms, anti-patterns
-    assets/skeleton/              # Bubble app template (rename app_name → your_app)
-  rubysmithing-scaffold/          # rubysmith/gemsmith project init
-  rubysmithing-genai/             # LLM, RAG, DSPy, MCP, embeddings
-  rubysmithing-refactor/          # Convention-targeted refactoring
-  rubysmithing-report/           # SIFT Protocol V1.0 QA
-  rubysmithing-yardoc/           # YARD docs with semantic AST analysis
-  rubysmithing-analyse/          # Gemba Walk, Muda, Root-Cause, Five Whys
+      tui-patterns.md              # Context7-verified Bubble gem API patterns
+      design-patterns.md           # Architecture decisions, layout paradigms, anti-patterns
+    assets/skeleton/               # Bubble app template (rename app_name → your_app)
+  rubysmithing-scaffold/           # rubysmith/gemsmith project init
+    agents/rubysmithing-scaffold.md
+    commands/scaffold.md
+  rubysmithing-genai/              # LLM, RAG, DSPy, MCP, embeddings
+    agents/rubysmithing-genai.md
+  rubysmithing-refactor/           # Convention-targeted refactoring
+    agents/rubysmithing-refactor.md
+    commands/refactor.md
+  rubysmithing-report/             # SIFT Protocol V1.0 QA
+    agents/
+      rubysmithing-report.md
+      rubysmithing-meta-judge.md   # SADD: generates Ruby-calibrated YAML eval specs
+      rubysmithing-judge.md        # SADD: applies eval specs with file:line evidence
+    commands/report.md
+  rubysmithing-yardoc/             # YARD docs with semantic AST analysis
+    agents/rubysmithing-yardoc.md
+    commands/yardoc.md
+  rubysmithing-analyse/            # Gemba Walk, Muda, Root-Cause, Five Whys
+    agents/rubysmithing-analyse.md
+    commands/analyse.md
     references/
-      analyse-methods.md          # Four methods with templates
+      analyse-methods.md           # Four methods with templates
     scripts/
-      create-scratchpad.sh        # Persists findings to .specs/scratchpad/<hex-id>.md
+      create-scratchpad.sh         # Persists findings to .specs/scratchpad/<hex-id>.md
 ```
 
 ---
